@@ -47,4 +47,54 @@ toCustomer(payload[0])]]></ee:set-payload>
 			</ee:message>
 		</ee:transform>
 	</flow>
+	<flow name="impl-create-customer" doc:id="34b69d14-c32c-4609-97a4-13568b4b2c83" >
+		<flow-ref doc:name="Validate Input" doc:id="51052bb6-97cd-499d-be1d-36c2598edffc" name="validate-business-rules-subflow"/>
+		<ee:transform doc:name="Normalize New Customer" doc:id="b2753bd4-83e5-499b-a7ef-0cd3ed30b25f" >
+			<ee:message >
+			</ee:message>
+			<ee:variables >
+				<ee:set-variable variableName="customer" ><![CDATA[%dw 2.0
+output application/java
+---
+{
+	id: "C" ++ (uuid()[0 to 7]),
+	firstName: trim(payload.firstName),
+	lastName: trim(payload.lastName),
+	email: lower(trim(payload.email)),
+	phone: trim(payload.phone default ""),
+	city: trim(payload.city default ""),
+	sfAccountId: null
+}]]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+		<db:select doc:name="Find by Email" doc:id="071e9706-9d4a-480e-ae77-cc5e543e6c2e" config-ref="Database_Config" target="existingCustomers">
+			<db:sql ><![CDATA[SELECT id
+FROM customers
+WHERE email = :email]]></db:sql>
+			<db:input-parameters ><![CDATA[#[{
+	email: vars.customer.email
+}]]]></db:input-parameters>
+		</db:select>
+		<choice doc:name="Duplicate?" doc:id="4523cf52-a62f-4442-915b-92aca833d236" >
+			<when expression="#[not isEmpty(vars.existingCustomers)]">
+				<raise-error doc:name="Duplicate Customer" doc:id="46c23113-2261-451b-931c-5d9c577f14c3" type="CUSTOMER:DUPLICATE" description="#['A customer with email ' ++ vars.customer.email ++ ' already exists']"/>
+			</when>
+		</choice>
+		<db:insert doc:name="Insert Customer" doc:id="1c7ceef2-7fdf-43ed-b285-cb7a83b33bb8" config-ref="Database_Config">
+			<db:sql ><![CDATA[INSERT INTO customers (id, first_name, last_name, email, phone, city)
+VALUES (:id, :firstName, :lastName, :email, :phone, :city)]]></db:sql>
+			<db:input-parameters ><![CDATA[#[{
+	id: vars.customer.id,
+	firstName: vars.customer.firstName,
+	lastName: vars.customer.lastName,
+	email: vars.customer.email,
+	phone: vars.customer.phone,
+	city: vars.customer.city
+}]]]></db:input-parameters>
+		</db:insert>
+		<logger level="INFO" doc:name="Log CUSTOMER_CREATED" doc:id="cb717019-827e-4ffa-9292-755eb3f5026a" message="#[output application/json indent=false --- {event: 'CUSTOMER_CREATED', customerId: vars.customer.id, correlationId: correlationId}]"/>
+		<flow-ref doc:name="Create Salesforce Account" doc:id="5583b99f-3254-440e-8200-befdd96553c9" name="sync-salesforce-account-flow"/>
+		<set-variable value="#[201]" doc:name="Status 201" doc:id="cab12a83-d22d-41af-ac4e-a79178c0f41b" variableName="httpStatus"/>
+		<flow-ref doc:name="Build Response" doc:id="f28078f1-3204-4f46-b632-e9ce0aeb173b" name="build-save-result-subflow"/>
+	</flow>
 </mule>
