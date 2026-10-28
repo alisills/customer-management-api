@@ -34,4 +34,17 @@ payload map ((row) -> toCustomer(row))]]></ee:set-payload>
 			</ee:message>
 		</ee:transform>
 	</flow>
+	<flow name="impl-get-customer" doc:id="e021caff-3219-4c0d-8c94-96ac9cddd58a" >
+		<set-variable value="#[attributes.uriParams.id]" doc:name="Save Customer ID" doc:id="ac19f83b-b018-442d-bb84-fb3d627657a0" variableName="customerId"/>
+		<flow-ref doc:name="Find Customer" doc:id="7e8bce2d-b92a-4076-8a5d-cf55b9f7d02c" name="find-customer-flow"/>
+		<ee:transform doc:name="Row to Customer" doc:id="990362a5-a2d4-49ed-b312-d3ccd84dedf0" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+import toCustomer from modules::CustomerMapping
+output application/json
+---
+toCustomer(payload[0])]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
 </mule>
