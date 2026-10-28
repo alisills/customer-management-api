@@ -1,5 +1,37 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<mule xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd"></mule>
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:db="http://www.mulesoft.org/schema/mule/db"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<flow name="impl-search-customers" doc:id="6a09f987-d74d-40da-8231-ce36d92059f8" >
+		<db:select doc:name="Search Customers" doc:id="72d0da54-0048-4cdc-b56d-94638dabe469" config-ref="Database_Config">
+			<db:sql ><![CDATA[SELECT id, first_name, last_name, email, phone, city, sf_account_id
+FROM customers
+WHERE (:city = '' OR LOWER(city) = LOWER(:cityValue))
+	AND (:lastName = '' OR LOWER(last_name) = LOWER(:lastNameValue))
+	AND (:email = '' OR email = LOWER(:emailValue))
+ORDER BY last_name, first_name
+LIMIT 100]]></db:sql>
+			<db:input-parameters ><![CDATA[#[{
+	city: attributes.queryParams.city default "",
+	cityValue: attributes.queryParams.city default "",
+	lastName: attributes.queryParams.lastName default "",
+	lastNameValue: attributes.queryParams.lastName default "",
+	email: attributes.queryParams.email default "",
+	emailValue: attributes.queryParams.email default ""
+}]]]></db:input-parameters>
+		</db:select>
+		<ee:transform doc:name="Rows to Customers" doc:id="c0c589f0-2214-4554-8085-7b8bb0b94201" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/java
+import toCustomer from modules::CustomerMapping
+output application/json
+---
+payload map ((row) -> toCustomer(row))]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+</mule>
