@@ -97,4 +97,58 @@ VALUES (:id, :firstName, :lastName, :email, :phone, :city)]]></db:sql>
 		<set-variable value="#[201]" doc:name="Status 201" doc:id="cab12a83-d22d-41af-ac4e-a79178c0f41b" variableName="httpStatus"/>
 		<flow-ref doc:name="Build Response" doc:id="f28078f1-3204-4f46-b632-e9ce0aeb173b" name="build-save-result-subflow"/>
 	</flow>
+	<flow name="impl-update-customer" doc:id="02f60173-18bc-43d9-b72a-8051418a98fa" >
+		<set-variable value="#[attributes.uriParams.id]" doc:name="Save Customer ID" doc:id="1716e4cb-405d-41e0-b6de-6b92c0c06510" variableName="customerId"/>
+		<set-variable value="#[payload]" doc:name="Save Request Body" doc:id="71806a28-602e-4e0a-84ab-2ac3dd4d29cb" variableName="requestBody"/>
+		<flow-ref doc:name="Validate Input" doc:id="67741382-3ff7-4643-bd23-eaf41e0804fd" name="validate-business-rules-subflow"/>
+		<flow-ref doc:name="Find Existing Customer" doc:id="f903044c-2be1-4b41-bff0-53e06631d5a3" name="find-customer-flow"/>
+		<ee:transform doc:name="Normalize Updated Customer" doc:id="5ded05d8-e371-4f09-ae94-55fd6bd3ecfb" >
+			<ee:message >
+			</ee:message>
+			<ee:variables >
+				<ee:set-variable variableName="customer" ><![CDATA[%dw 2.0
+output application/java
+---
+{
+	id: vars.customerId,
+	firstName: trim(vars.requestBody.firstName),
+	lastName: trim(vars.requestBody.lastName),
+	email: lower(trim(vars.requestBody.email)),
+	phone: trim(vars.requestBody.phone default ""),
+	city: trim(vars.requestBody.city default ""),
+	sfAccountId: payload[0].sf_account_id
+}]]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+		<db:select doc:name="Email used by another customer?" doc:id="5171b953-0dc2-4ea8-b492-2bebc1354014" config-ref="Database_Config">
+			<db:sql ><![CDATA[SELECT id
+FROM customers
+WHERE email = :email AND id <> :id]]></db:sql>
+			<db:input-parameters ><![CDATA[#[{
+	email: vars.customer.email,
+	id: vars.customer.id
+}]]]></db:input-parameters>
+		</db:select>
+		<choice doc:name="Duplicate?" doc:id="53b36db3-4cd2-48a4-845f-00fe911284a6" >
+			<when expression="#[not isEmpty(vars.existingCustomers)]">
+				<raise-error doc:name="Duplicate Customer" doc:id="91797bfa-5e8f-44a3-a7c9-785e4794b200" type="CUSTOMER:DUPLICATE" description="#['A customer with email ' ++ vars.customer.email ++ ' already exists']"/>
+			</when>
+		</choice>
+		<db:update doc:name="Update Customer" doc:id="fc1c2d59-4f27-4db6-bfed-c7b980543d3f" config-ref="Database_Config">
+			<db:sql ><![CDATA[UPDATE customers
+SET first_name = :firstName, last_name = :lastName, email = :email, phone = :phone, city = :city
+WHERE id = :id]]></db:sql>
+			<db:input-parameters ><![CDATA[#[{
+	id: vars.customer.id,
+	firstName: vars.customer.firstName
+	lastName: vars.customer.lastName,
+	email: vars.customer.email,
+	phone: vars.customer.phone,
+	city: vars.customer.city
+}]]]></db:input-parameters>
+		</db:update>
+		<logger level="INFO" doc:name="Log CUSTOMER_UPDATED" doc:id="37777f92-15b5-4cda-bc1f-a9ae1a5f2882" message="#[output application/json indent=false --- {event: 'CUSTOMER_UPDATED', customerId: vars.customer.id, correlationId: correlationId}]"/>
+		<flow-ref doc:name="Update Salesforce Account" doc:id="012584e6-752f-41f2-8ad3-a2860ea69fbb" name="sync-salesforce-account-flow"/>
+		<flow-ref doc:name="Build Response" doc:id="a1762b2c-c112-4e74-b7d1-fca9d1a47f4b" name="build-save-result-subflow"/>
+	</flow>
 </mule>
