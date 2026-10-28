@@ -5,6 +5,5 @@ API built with API life cycle manipulating data using MySQL database and Salesfo
 ## ⚙️ Features
 ## ⏳ The Process
 ## 📗 What I learned
-## 🌱 Overall Growth
 ## 🏃 Running the Project
-## 🍿 Video
+## 🍿 Preview
