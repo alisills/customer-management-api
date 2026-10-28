@@ -25,83 +25,19 @@
         </http:listener>
         <apikit:console config-ref="customer-management-api-config" />
     </flow>
-    <flow name="put:\customers\(id):application\json:customer-management-api-config">
-        <ee:transform doc:name="Transform Message">
-            <ee:variables>
-                <ee:set-variable variableName="id">attributes.uriParams.'id'</ee:set-variable>
-            </ee:variables>
-        </ee:transform>
-        <ee:transform doc:name="Transform Message">
-            <ee:message>
-                <ee:set-payload><![CDATA[%dw 2.0
-output application/json
----
-{
-  id: "C7f3a92b1",
-  firstName: "Ravi",
-  lastName: "Kumar",
-  email: "ravi.kumar@example.com",
-  phone: "+91-98450-22222",
-  city: "Chennai",
-  sfAccountId: "001XXXXXXXXXX",
-  salesforceSync: "SYNCED"
-} as Object {encoding: "UTF-8", mediaType: "application/json"}]]></ee:set-payload>
-            </ee:message>
-        </ee:transform>
-    </flow>
-    <flow name="delete:\customers\(id):customer-management-api-config">
-        <ee:transform doc:name="Transform Message">
-            <ee:variables>
-                <ee:set-variable variableName="id">attributes.uriParams.'id'</ee:set-variable>
-            </ee:variables>
-        </ee:transform>
-        <logger level="INFO" message="delete:\customers\(id):customer-management-api-config" />
-    </flow>
     <flow name="get:\customers:customer-management-api-config">
-        <ee:transform doc:name="Transform Message">
-            <ee:message>
-                <ee:set-payload><![CDATA[%dw 2.0
-output application/json
----
-[
-  {
-    id: "C1001",
-    firstName: "Asha",
-    lastName: "Rao",
-    email: "asha.rao@example.com",
-    phone: "+91-98450-11111",
-    city: "Pune",
-    sfAccountId: null
-  }
-] as Array {encoding: "UTF-8", mediaType: "application/json"}]]></ee:set-payload>
-            </ee:message>
-        </ee:transform>
+        <flow-ref doc:name="Search Customers" doc:id="34123f42-c173-403c-824d-ffc757cc22cb" name="impl-search-customers"/>
     </flow>
-    <flow name="get:\customers\(id):customer-management-api-config">
-        <ee:transform doc:name="Transform Message">
-            <ee:variables>
-                <ee:set-variable variableName="id">attributes.uriParams.'id'</ee:set-variable>
-            </ee:variables>
-        </ee:transform>
-        <logger level="INFO" message="get:\customers\(id):customer-management-api-config" />
+	<flow name="post:\customers:application\json:customer-management-api-config">
+        <flow-ref doc:name="Create Customer" doc:id="5793ed21-ea32-49d7-b8d5-83e6f3db3527" name="impl-create-customer"/>
     </flow>
-    <flow name="post:\customers:application\json:customer-management-api-config">
-        <ee:transform doc:name="Transform Message">
-            <ee:message>
-                <ee:set-payload><![CDATA[%dw 2.0
-output application/json
----
-{
-  id: "C7f3a92b1",
-  firstName: "Ravi",
-  lastName: "Kumar",
-  email: "ravi.kumar@example.com",
-  phone: "+91-98450-22222",
-  city: "Chennai",
-  sfAccountId: "001XXXXXXXXXX",
-  salesforceSync: "SYNCED"
-} as Object {encoding: "UTF-8", mediaType: "application/json"}]]></ee:set-payload>
-            </ee:message>
-        </ee:transform>
+	<flow name="get:\customers\(id):customer-management-api-config">
+		<flow-ref doc:name="Get Customer" doc:id="2155645a-121d-42b7-8078-c4e0be3ee166" name="impl-get-customer"/>
+    </flow>
+	<flow name="put:\customers\(id):application\json:customer-management-api-config">
+		<flow-ref doc:name="Update Customer" doc:id="e6488404-f7ec-4e0e-8eb4-2ee36fb4c55e" name="impl-update-customer"/>
+    </flow>
+	<flow name="delete:\customers\(id):customer-management-api-config">
+		<flow-ref doc:name="Delete Customer" doc:id="d9bf5d40-c1af-4a1d-bf31-774e94644826" name="impl-delete-customer"/>
     </flow>
 </mule>
