@@ -1,10 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:db="http://www.mulesoft.org/schema/mule/db"
-	xmlns="http://www.mulesoft.org/schema/mule/core"
-	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+<mule xmlns:salesforce="http://www.mulesoft.org/schema/mule/salesforce" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns:db="http://www.mulesoft.org/schema/mule/db"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
 http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd
-http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/salesforce http://www.mulesoft.org/schema/mule/salesforce/current/mule-salesforce.xsd">
 	<flow name="impl-search-customers" doc:id="6a09f987-d74d-40da-8231-ce36d92059f8" >
 		<db:select doc:name="Search Customers" doc:id="72d0da54-0048-4cdc-b56d-94638dabe469" config-ref="Database_Config">
 			<db:sql ><![CDATA[SELECT id, first_name, last_name, email, phone, city, sf_account_id
@@ -200,5 +201,91 @@ output application/java
 				<raise-error doc:name="Invalid request" doc:id="aa7599e8-8b15-400f-b7a8-f1ba3a24fa28" type="CUSTOMER:INVALID_REQUEST" description="#[vars.validationErrors joinBy '; ']"/>
 			</when>
 		</choice>
+	</sub-flow>
+	<flow name="sync-salesforce-account-flow" doc:id="26a19779-6f72-4a4d-b8d5-875f39cdfa86" >
+		<set-variable value="#[vars.customer.sfAccountId]" doc:name="Current Account ID" doc:id="898d8d96-7780-436f-8fd3-434213220115" variableName="sfAccountId"/>
+		<try doc:name="Salesforce sync (must not fail the request)" doc:id="7db503dd-82ae-4df1-92a1-ba4d633a6587" >
+			<choice doc:name="Linked to an Account?" doc:id="7c6c161b-be51-4874-8e9c-65e65e02838a" >
+				<when expression="#[isEmpty(vars.customer.sfAccountId)]">
+					<ee:transform doc:name="Customer to new Account" doc:id="6b8ad9f6-0167-40d9-a9b0-abf9edbc35c4" >
+						<ee:message >
+							<ee:set-payload ><![CDATA[%dw 2.0
+output application/java
+---
+[{
+	Name: vars.customer.firstName ++ " " ++ vars.customer.lastName,
+	Phone: vars.customer.phone,
+	BillingCity: vars.customer.city,
+	Customer_Id__c: vars.customer.id
+}	filterObject ((value) -> not isEmpty(value))]	]]></ee:set-payload>
+						</ee:message>
+					</ee:transform>
+					<salesforce:create type="Account" doc:name="Create Account" doc:id="868785f4-eeec-4ffc-a098-a5dc31aa3bfc" config-ref="Salesforce_Config" />
+					<choice doc:name="Created?" doc:id="d1c5c27a-dcd9-4d14-a4fe-8bb745685356">
+			<when expression="#[not payload.successful]">
+				<raise-error doc:name="Rejected" doc:id="8c0c5f43-21dd-40b0-90e0-ac030eac0b5b" type="SYNC:REJECTED" description="#[payload.items[0].message default 'Salesforce rejected the Account']" />
+			</when>
+		</choice>
+					<set-variable value="#[payload.items[0].id]" doc:name="New Account ID" doc:id="3017ba13-6a5b-47c2-b5bd-9edc0d781372" variableName="sfAccountId"/>
+					<db:update doc:name="Save Salesforce ID" doc:id="f6371252-07c5-4ad8-b1ad-a191ead5831b" config-ref="Database_Config">
+						<db:sql ><![CDATA[UPDATE customers
+SET sf_account_id = :sfAccountId
+WHERE id = :id]]></db:sql>
+						<db:input-parameters ><![CDATA[#[{
+	sfAccountId: vars.sfAccountId,
+	id: vars.customer.id
+}]]]></db:input-parameters>
+					</db:update>
+				</when>
+				<otherwise >
+					<ee:transform doc:name="Customer to Account Update" doc:id="a91ffdfb-fc11-4fc5-8ed1-2558cb825264" >
+						<ee:message >
+							<ee:set-payload ><![CDATA[%dw 2.0
+output application/java
+---
+[{
+	Id: vars.customer.sfAccountId,
+	Name: vars.customer.firstName ++ " " ++ vars.customer.lastName,
+	Phone: vars.customer.phone,
+	BillingCity: vars.customer.city
+}]]]></ee:set-payload>
+						</ee:message>
+					</ee:transform>
+					<salesforce:update type="Account" doc:name="Update Account" doc:id="e5ae624a-398d-409f-a11b-e401913ec659" config-ref="Salesforce_Config"/>
+					<choice doc:name="Updated?" doc:id="9fc29f58-5316-47d9-818b-4a39f7a0ad2c" >
+						<when expression="#[not payload.successful]">
+							<raise-error doc:name="Rejected" doc:id="4dc07815-6690-4d18-b9c0-29d014a97017" type="SYNC:REJECTED" description="#[payload.items[0].message default 'Salesforce rejected the update']"/>
+						</when>
+					</choice>
+				</otherwise>
+			</choice>
+			<set-variable value="SYNCED" doc:name="SYNCED" doc:id="49871f4d-8b8d-47da-99aa-3c13c19b65dc" variableName="salesforceSync"/>
+			<logger level="INFO" doc:name="Log SALESFORCE_SYNCED" doc:id="c369458f-fe38-4635-bc94-d4719c40918d" message="#[output application/json indent=false --- { event: 'SALESFROCE_SYNCED', customerId: vars.customer.id, sfAccountId: vars.sfAccountId, correlationId: correlationId}]"/>
+			<error-handler >
+				<on-error-continue enableNotifications="true" logException="false" doc:name="On Error Continue" doc:id="21857f43-890c-4c45-a7b4-965195339060" type="ANY">
+					<set-variable value="FAILED" doc:name="FAILED" doc:id="c09b2921-7804-4ff8-ae60-f7376f810f70" variableName="salesforceSync"/>
+					<logger level="WARN" doc:name="Log SALESFORCE_SYNC_FAILED" doc:id="5f6dd2c9-fc2a-46b8-ac78-6fa595be7f87" message="#[output application/json &#10;indent=false &#10;--- &#10;{&#10;	event: 'SALESFORCE_SYNC_FAILED',&#10;	customerId: vars.customer.id,&#10;	errorType: (error.errorType.namespace default '') ++ ':' ++ (error.errorType.identifier default ''),&#10;	detail: error.description,&#10;	correlationId: correlationId&#10;}]"/>
+				</on-error-continue>
+			</error-handler>
+		</try>
+	</flow>
+	<sub-flow name="build-save-result-subflow" doc:id="ed304076-78c3-4afb-ace3-22bcc32092b4" >
+		<ee:transform doc:name="Customer Save Result" doc:id="5640aa3a-7ec5-43b8-b736-3eb9458742f5" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	id: vars.customer.id,
+	firstName: vars.customer.firstName,
+	lastName: vars.customer.lastName,
+	email: vars.customer.email,
+	phone: vars.customer.phone,
+	city: vars.customer.city,
+	sfAccountId: vars.sfAccountId,
+	salesforceSync: vars.salesforceSync
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
 	</sub-flow>
 </mule>
