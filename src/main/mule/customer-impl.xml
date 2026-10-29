@@ -182,4 +182,23 @@ WHERE id = :id]]></db:sql>
 			</when>
 		</choice>
 	</flow>
+	<sub-flow name="validate-business-rules-subflow" doc:id="a8d3fdc6-9342-4147-ac6d-0d8dc25bff46" >
+		<ee:transform doc:name="Collect Business Rule Errors" doc:id="74ed24e3-b2a3-413e-8c10-aba1e6005015" >
+			<ee:message >
+			</ee:message>
+			<ee:variables >
+				<ee:set-variable variableName="validationErrors" ><![CDATA[%dw 2.0
+output application/java
+---
+["firstName", "lastName"]
+	filter ((field) -> isEmpty(trim(payload[field] default "")))
+	map ((field) -> field ++ " must not be blank")]]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+		<choice doc:name="Any Errors?" doc:id="1dbe23f6-3dac-4f26-a44b-8f5a4c84f401" >
+			<when expression="#[not isEmpty(vars.validationErrors)]">
+				<raise-error doc:name="Invalid request" doc:id="aa7599e8-8b15-400f-b7a8-f1ba3a24fa28" type="CUSTOMER:INVALID_REQUEST" description="#[vars.validationErrors joinBy '; ']"/>
+			</when>
+		</choice>
+	</sub-flow>
 </mule>
