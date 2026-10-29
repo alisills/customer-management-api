@@ -151,4 +151,22 @@ WHERE id = :id]]></db:sql>
 		<flow-ref doc:name="Update Salesforce Account" doc:id="012584e6-752f-41f2-8ad3-a2860ea69fbb" name="sync-salesforce-account-flow"/>
 		<flow-ref doc:name="Build Response" doc:id="a1762b2c-c112-4e74-b7d1-fca9d1a47f4b" name="build-save-result-subflow"/>
 	</flow>
+	<flow name="impl-delete-customer" doc:id="d12361e5-ead2-41a0-a1ee-ac8baa2b698c" >
+		<set-variable value="#[attributes.uriParams.id]" doc:name="Save Customer ID" doc:id="f75d1a47-bc16-40f0-8e99-71e7a2282eef" variableName="customerId"/>
+		<db:delete doc:name="Delete Customer" doc:id="8f189e86-5d1a-4743-b2e1-9d418befe628" config-ref="Database_Config">
+			<db:sql ><![CDATA[DELETE FROM customers
+WHERE id = :id]]></db:sql>
+			<db:input-parameters ><![CDATA[#[{
+	id: vars.customerId
+}]]]></db:input-parameters>
+		</db:delete>
+		<choice doc:name="Row deleted?" doc:id="c4db4851-4c8a-4c40-821b-afefe171c761" >
+			<when expression="#[payload.affectedRows == 0]">
+				<raise-error doc:name="Not Found" doc:id="8413d0ae-2575-4281-ab56-2429a2b2d2c0" type="CUSTOMER:NOT_FOUND" description="#['Customer ' ++ vars.customerId ++ ' not found']"/>
+			</when>
+		</choice>
+		<logger level="INFO" doc:name="Log CUSTOMER_DELETED" doc:id="fc5c76c9-ac21-43f6-99c1-d9a27e16d21f" message="#[output application/json indent=false --- {event: 'CUSTOMER_DELETED', customerId: vars.customerId, correlationId: correlationId}]"/>
+		<set-variable value="#[204]" doc:name="Status 204" doc:id="d383f518-e6dc-4006-b980-01cd4fdfb05b" variableName="httpStatus"/>
+		<set-payload value="#['']" doc:name="Empty Body" doc:id="5869ebf8-8faf-47d4-9f39-1b8f55c6e21f" />
+	</flow>
 </mule>
