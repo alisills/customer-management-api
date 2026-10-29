@@ -169,4 +169,17 @@ WHERE id = :id]]></db:sql>
 		<set-variable value="#[204]" doc:name="Status 204" doc:id="d383f518-e6dc-4006-b980-01cd4fdfb05b" variableName="httpStatus"/>
 		<set-payload value="#['']" doc:name="Empty Body" doc:id="5869ebf8-8faf-47d4-9f39-1b8f55c6e21f" />
 	</flow>
+	<flow name="find-customer-flow" doc:id="77217dcf-02cd-49e8-98ae-442d73f01c56" >
+		<db:select doc:name="Select Customer by ID" doc:id="a053e0e9-73bf-4132-8a61-75339c930a1e" config-ref="Database_Config">
+			<db:sql ><![CDATA[SELECT id, first_name, last_name, email, phone, city, sf_account_id
+FROM customers
+WHERE id = :id]]></db:sql>
+			<db:input-parameters ><![CDATA[#[{id: vars.customerId}]]]></db:input-parameters>
+		</db:select>
+		<choice doc:name="Found?" doc:id="e451213a-28b6-4602-ae54-127bf63e4014" >
+			<when expression="#[isEmpty(payload)]">
+				<raise-error doc:name="Not found" doc:id="00620e58-7644-479f-8689-b47435056cdf" type="CUSTOMER:NOT_FOUND" description="#['Customer ' ++ vars.customerId ++ ' not found']"/>
+			</when>
+		</choice>
+	</flow>
 </mule>
