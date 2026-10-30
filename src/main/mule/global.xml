@@ -8,7 +8,7 @@ http://www.mulesoft.org/schema/mule/secure-properties http://www.mulesoft.org/sc
 http://www.mulesoft.org/schema/mule/salesforce http://www.mulesoft.org/schema/mule/salesforce/current/mule-salesforce.xsd
 http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd
 http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
-	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="c7bfb58f-2a2e-4d7d-a573-a466fce0fac6" basePath="/api" >
+	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="c7bfb58f-2a2e-4d7d-a573-a466fce0fac6" basePath="/api/*" >
 		<http:listener-connection host="0.0.0.0" port="${http.port}" />
 	</http:listener-config>
 	<configuration-properties doc:name="Configuration properties" doc:id="ac837005-b1ae-482b-a5a1-516aa801d4bf" file="config\dev.yaml" />

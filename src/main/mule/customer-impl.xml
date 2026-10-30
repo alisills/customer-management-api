@@ -6,6 +6,7 @@
 http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd
 http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
 http://www.mulesoft.org/schema/mule/salesforce http://www.mulesoft.org/schema/mule/salesforce/current/mule-salesforce.xsd">
+	<!-- ========== Search Customers: GET /api/customers ========== -->
 	<flow name="impl-search-customers" doc:id="6a09f987-d74d-40da-8231-ce36d92059f8" >
 		<db:select doc:name="Search Customers" doc:id="72d0da54-0048-4cdc-b56d-94638dabe469" config-ref="Database_Config">
 			<db:sql ><![CDATA[SELECT id, first_name, last_name, email, phone, city, sf_account_id
@@ -35,6 +36,7 @@ payload map ((row) -> toCustomer(row))]]></ee:set-payload>
 			</ee:message>
 		</ee:transform>
 	</flow>
+	<!-- ========= Get customer: GET /api/customers/{id} -->
 	<flow name="impl-get-customer" doc:id="e021caff-3219-4c0d-8c94-96ac9cddd58a" >
 		<set-variable value="#[attributes.uriParams.id]" doc:name="Save Customer ID" doc:id="ac19f83b-b018-442d-bb84-fb3d627657a0" variableName="customerId"/>
 		<flow-ref doc:name="Find Customer" doc:id="7e8bce2d-b92a-4076-8a5d-cf55b9f7d02c" name="find-customer-flow"/>
@@ -48,6 +50,7 @@ toCustomer(payload[0])]]></ee:set-payload>
 			</ee:message>
 		</ee:transform>
 	</flow>
+	<!-- ========== Create customer: POST /api/customers ========== -->
 	<flow name="impl-create-customer" doc:id="34b69d14-c32c-4609-97a4-13568b4b2c83" >
 		<flow-ref doc:name="Validate Input" doc:id="51052bb6-97cd-499d-be1d-36c2598edffc" name="validate-business-rules-subflow"/>
 		<ee:transform doc:name="Normalize New Customer" doc:id="b2753bd4-83e5-499b-a7ef-0cd3ed30b25f" >
@@ -98,6 +101,7 @@ VALUES (:id, :firstName, :lastName, :email, :phone, :city)]]></db:sql>
 		<set-variable value="#[201]" doc:name="Status 201" doc:id="cab12a83-d22d-41af-ac4e-a79178c0f41b" variableName="httpStatus"/>
 		<flow-ref doc:name="Build Response" doc:id="f28078f1-3204-4f46-b632-e9ce0aeb173b" name="build-save-result-subflow"/>
 	</flow>
+	<!-- ========== Update customer: PUT /api/customers/{id} ========== -->
 	<flow name="impl-update-customer" doc:id="02f60173-18bc-43d9-b72a-8051418a98fa" >
 		<set-variable value="#[attributes.uriParams.id]" doc:name="Save Customer ID" doc:id="1716e4cb-405d-41e0-b6de-6b92c0c06510" variableName="customerId"/>
 		<set-variable value="#[payload]" doc:name="Save Request Body" doc:id="71806a28-602e-4e0a-84ab-2ac3dd4d29cb" variableName="requestBody"/>
@@ -111,7 +115,7 @@ VALUES (:id, :firstName, :lastName, :email, :phone, :city)]]></db:sql>
 output application/java
 ---
 {
-	id: vars.customerId,
+	id: vars.customer.Id,
 	firstName: trim(vars.requestBody.firstName),
 	lastName: trim(vars.requestBody.lastName),
 	email: lower(trim(vars.requestBody.email)),
@@ -141,7 +145,7 @@ SET first_name = :firstName, last_name = :lastName, email = :email, phone = :pho
 WHERE id = :id]]></db:sql>
 			<db:input-parameters ><![CDATA[#[{
 	id: vars.customer.id,
-	firstName: vars.customer.firstName
+	firstName: vars.customer.firstName,
 	lastName: vars.customer.lastName,
 	email: vars.customer.email,
 	phone: vars.customer.phone,
@@ -152,6 +156,7 @@ WHERE id = :id]]></db:sql>
 		<flow-ref doc:name="Update Salesforce Account" doc:id="012584e6-752f-41f2-8ad3-a2860ea69fbb" name="sync-salesforce-account-flow"/>
 		<flow-ref doc:name="Build Response" doc:id="a1762b2c-c112-4e74-b7d1-fca9d1a47f4b" name="build-save-result-subflow"/>
 	</flow>
+	<!-- ========== Delete customer: DELETE /api/customers/{id} -->
 	<flow name="impl-delete-customer" doc:id="d12361e5-ead2-41a0-a1ee-ac8baa2b698c" >
 		<set-variable value="#[attributes.uriParams.id]" doc:name="Save Customer ID" doc:id="f75d1a47-bc16-40f0-8e99-71e7a2282eef" variableName="customerId"/>
 		<db:delete doc:name="Delete Customer" doc:id="8f189e86-5d1a-4743-b2e1-9d418befe628" config-ref="Database_Config">
@@ -170,6 +175,7 @@ WHERE id = :id]]></db:sql>
 		<set-variable value="#[204]" doc:name="Status 204" doc:id="d383f518-e6dc-4006-b980-01cd4fdfb05b" variableName="httpStatus"/>
 		<set-payload value="#['']" doc:name="Empty Body" doc:id="5869ebf8-8faf-47d4-9f39-1b8f55c6e21f" />
 	</flow>
+	<!-- ========== Shared: find one customer ========== -->
 	<flow name="find-customer-flow" doc:id="77217dcf-02cd-49e8-98ae-442d73f01c56" >
 		<db:select doc:name="Select Customer by ID" doc:id="a053e0e9-73bf-4132-8a61-75339c930a1e" config-ref="Database_Config">
 			<db:sql ><![CDATA[SELECT id, first_name, last_name, email, phone, city, sf_account_id
@@ -183,6 +189,7 @@ WHERE id = :id]]></db:sql>
 			</when>
 		</choice>
 	</flow>
+	<!-- ========== Business validation (RAML rules are checked by APIkit ========== -->
 	<sub-flow name="validate-business-rules-subflow" doc:id="a8d3fdc6-9342-4147-ac6d-0d8dc25bff46" >
 		<ee:transform doc:name="Collect Business Rule Errors" doc:id="74ed24e3-b2a3-413e-8c10-aba1e6005015" >
 			<ee:message >
@@ -202,6 +209,7 @@ output application/java
 			</when>
 		</choice>
 	</sub-flow>
+	<!-- ========== Create or update the Salesforce Account ========== -->
 	<flow name="sync-salesforce-account-flow" doc:id="26a19779-6f72-4a4d-b8d5-875f39cdfa86" >
 		<set-variable value="#[vars.customer.sfAccountId]" doc:name="Current Account ID" doc:id="898d8d96-7780-436f-8fd3-434213220115" variableName="sfAccountId"/>
 		<try doc:name="Salesforce sync (must not fail the request)" doc:id="7db503dd-82ae-4df1-92a1-ba4d633a6587" >
@@ -269,6 +277,7 @@ output application/java
 			</error-handler>
 		</try>
 	</flow>
+	<!-- ========== Response for Create and Update -->
 	<sub-flow name="build-save-result-subflow" doc:id="ed304076-78c3-4afb-ace3-22bcc32092b4" >
 		<ee:transform doc:name="Customer Save Result" doc:id="5640aa3a-7ec5-43b8-b736-3eb9458742f5" >
 			<ee:message >
