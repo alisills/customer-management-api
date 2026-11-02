@@ -124,7 +124,7 @@ output application/java
 }]]></ee:set-variable>
 			</ee:variables>
 		</ee:transform>
-		<db:select doc:name="Email used by another customer?" doc:id="5171b953-0dc2-4ea8-b492-2bebc1354014" config-ref="Database_Config">
+		<db:select doc:name="Email used by another customer?" doc:id="5171b953-0dc2-4ea8-b492-2bebc1354014" config-ref="Database_Config" target="existingCustomers">
 			<db:sql ><![CDATA[SELECT id
 FROM customers
 WHERE email = :email AND id <> :id]]></db:sql>
