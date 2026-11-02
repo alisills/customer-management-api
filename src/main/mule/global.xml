@@ -103,7 +103,7 @@ output application/json
 ---
 {
 	status: "ERROR",
-	errorCode: vars.errorMessage,
+	errorCode: vars.errorCode,
 	message: vars.errorMessage,
 	correlationId: correlationId
 }]]></ee:set-payload>
