@@ -114,7 +114,7 @@ VALUES (:id, :firstName, :lastName, :email, :phone, :city)]]></db:sql>
 output application/java
 ---
 {
-	id: vars.customer.Id,
+	id: vars.customerId,
 	firstName: trim(vars.requestBody.firstName),
 	lastName: trim(vars.requestBody.lastName),
 	email: lower(trim(vars.requestBody.email)),
