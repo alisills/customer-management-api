@@ -5,17 +5,18 @@ API built with API life cycle manipulating data using MySQL database and Salesfo
 
 ![MySQL](https://img.shields.io/badge/MySQL-4479A1?style=for-the-badge&logo=mysql&logoColor=white) ![Salesforce](https://img.shields.io/badge/Salesforce-00A1E0?style=for-the-badge&logo=salesforce&logoColor=white)
 
-### ♦️ API Design
-- **RAML 1.0** -
-- **Design Center** -
-- **APIkit** -
-### ♦️ Integration Development
+### 🔹 API Design
+- **Design Center** - Used to author the API specification in RAML 1.0.
+- **RAML 1.0** -  Defined GET, POST, PUT, and DELETE methods to read, create, update, and delete customer data.
+- **APIkit** - Generated flow scaffolding from RAML and enabled request routing.
+- **Anypoint Studio** - Implemented Mule flows using Database Connector,Salesforce Connector, and Choice Router with Raise Error for conditional error handling.
+### 🔹 Integration Development
 - **Anypoint Integration** -
-- **Dataweave 2.0** -
-### ♦️ Data & Connectivity
+- **Dataweave 2.0** - 
+### 🔹 Data & Connectivity
 - **MySQL** -
 - **Salesforce Connector** -
-### ♦️ Testing & Build
+### 🔹 Testing & Build
 - **Postamn** -
 - **MUnit** -
 ## ⚙️ Features
