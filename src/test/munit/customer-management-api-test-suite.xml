@@ -5,20 +5,58 @@
 	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
 http://www.mulesoft.org/schema/mule/munit http://www.mulesoft.org/schema/mule/munit/current/mule-munit.xsd
 http://www.mulesoft.org/schema/mule/munit-tools http://www.mulesoft.org/schema/mule/munit-tools/current/mule-munit-tools.xsd">
-	<munit:test name="customer-management-api-test-suite" doc:id="21cfd573-1d0d-43fb-9083-cdb4d72793e4" description="A new customer is inserted, an Account is created, and its ID is stored">
+	<munit:test name="create-customer-syncs-salesforce" doc:id="21cfd573-1d0d-43fb-9083-cdb4d72793e4" description="A new customer is inserted, an Account is created, and its ID is stored">
 		<munit:behavior >
-			<munit-tools:mock-when doc:name="Mock when" doc:id="a8528757-5859-4bfd-af55-c3810d522a07" processor="db:select">
+			<munit-tools:mock-when doc:name="Find by Email" doc:id="a8528757-5859-4bfd-af55-c3810d522a07" processor="db:select">
 				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="Find by email" attributeName="doc:name" />
 					<munit-tools:with-attribute whereValue="Find by email" attributeName="doc:name" />
 				</munit-tools:with-attributes>
 				<munit-tools:then-return >
 					<munit-tools:payload value="#[[]]" />
 				</munit-tools:then-return>
 			</munit-tools:mock-when>
-			<munit-tools:mock-when doc:name="Mock when" doc:id="279b503a-9b9a-4e73-ac9f-edca8153ad27" />
+			<munit-tools:mock-when doc:name="Insert Customer" doc:id="279b503a-9b9a-4e73-ac9f-edca8153ad27" processor="db:insert">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="Insert customer" attributeName="doc:name" />
+					<munit-tools:with-attribute whereValue="Insert customer" attributeName="doc:name" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:payload value="#[{affectedRows: 1}]" />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+			<munit-tools:mock-when doc:name="salesforce:create" doc:id="296cdfe0-2f7b-4db4-96ba-7da0e3dc7b1e" processor="salesforce:create">
+				<munit-tools:then-return >
+					<munit-tools:payload value="#[[{&#10;	successful: true,&#10;	items: [{&#10;		id: '001TESTACCOUNT0001',&#10;		successful: true&#10;	}]&#10;}]]" />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+			<munit-tools:mock-when doc:name="Save Salesforce ID" doc:id="65ddcd5d-1c3a-47e0-8ef2-9c5c518ba894" processor="db:update">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="Save Salesforce ID" attributeName="doc:name" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:payload value="#[[{affectedRows: 1}]]" />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
 		</munit:behavior>
 		<munit:execution >
-			<flow-ref doc:name="Flow-ref to customer-management-api-main" doc:id="1ed7fb8d-7028-4012-b073-860dbaaefdc9" name="customer-management-api-main"/>
+			<munit:set-event doc:name="New Customer Request" doc:id="9462ad81-7345-4cec-980e-d724a7780a2c" >
+				<munit:payload value="#[[{&#10;	firstName: ' Ravi',&#10;	lastName: 'Kumar',&#10;	email: 'Ravi.Kumar@example.com',&#10;	city: 'Chennai'&#10;}]]" />
+			</munit:set-event>
+			<flow-ref doc:name="Create Customer" doc:id="109fdbb0-5125-4e76-bde0-986dda4daad1" name="impl-create-customer"/>
 		</munit:execution>
+		<munit:validation >
+			<munit-tools:assert-that doc:name="Status 201" doc:id="bcd97a4b-e454-466f-8382-ff692b8eed7b" expression="#[vars.httpStatus]" is="#[MunitTools::equalTo(201)]"/>
+			<munit-tools:assert-equals doc:name="First Name" doc:id="2bb18a4b-8718-46a1-985f-55711737b7b4" actual="#[payload.firstName]" expected="#['Ravi']"/>
+			<munit-tools:assert-equals doc:name="Email" doc:id="bcbd03ab-4009-492d-aa38-bd9899b0d165" actual="#[payload.email]" expected="#['ravi.kumar@example.com']"/>
+			<munit-tools:assert-equals doc:name="Salesforce ID" doc:id="3c577ad4-12bb-4b07-af50-2cf1dfb7b34b" actual="#[payload.sfAccountId]" expected="#['001TESTACCOUNT0001']"/>
+			<munit-tools:assert-equals doc:name="Salesforce Synced?" doc:id="c0e13589-34ee-45b6-8a82-a23a34c72176" actual="#[payload.salesforceSync]" expected="#['SYNCED']"/>
+			<munit-tools:verify-call doc:name="db:insert" doc:id="f4e0c80f-a579-4372-9648-73dd186833ad" processor="db:insert"/>
+			<munit-tools:verify-call doc:name="db:update" doc:id="3f05efff-075b-45ee-b362-14dbce9ff74a" processor="db:insert">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="Save Salesforce ID" attributeName="doc:name" />
+				</munit-tools:with-attributes>
+			</munit-tools:verify-call>
+		</munit:validation>
 	</munit:test>
 </mule>

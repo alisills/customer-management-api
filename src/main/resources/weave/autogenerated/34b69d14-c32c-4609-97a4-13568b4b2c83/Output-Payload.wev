@@ -1,0 +1,13 @@
+%dw 2.0
+
+type auto_34b69d14_c32c_4609_97a4_13568b4b2c83_Output_Payload = {|
+  id: Null, 
+  firstName: Null, 
+  lastName: Null, 
+  email: Null, 
+  phone: Null, 
+  city: Null, 
+  sfAccountId: Null, 
+  salesforceSync: Null
+|}
+
