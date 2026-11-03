@@ -2,5 +2,11 @@
   "minMuleVersion": "4.12.0",
   "javaSpecificationVersions": [
     "17"
+  ],
+  "secureProperties": [
+  	"secure.key",
+  	"db.password",
+  	"sfdc.password",
+  	"sfdc.token"
   ]
 }
