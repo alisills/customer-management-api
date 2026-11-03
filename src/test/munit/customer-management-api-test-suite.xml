@@ -117,4 +117,13 @@ http://www.mulesoft.org/schema/mule/munit-tools http://www.mulesoft.org/schema/m
 			<flow-ref doc:name="Flow Reference" doc:id="4249aa08-8103-4b96-a9b5-260329312cc7" name="impl-create-customer"/>
 		</munit:execution>
 	</munit:test>
+	<!-- T4: blank name (passes RAML minLength, fails business rule) -->
+	<munit:test name="create-customer-blank-name-raises-invalid-request" doc:id="4ff6355b-b1cd-4a8c-827a-2712e34da17e" description="A first name of only spaces raises CUSTOMER:INVALID_REQUEST">
+		<munit:execution >
+			<munit:set-event doc:name="Blank First Name" doc:id="4fca9c79-c09e-4d79-bc98-68a53f55e9b0" >
+				<munit:payload value="#[{&#10;	firstName: ' ',&#10;	lastName: 'Kumar',&#10;	email: 'ravi.kumar@example.com'&#10;}]" />
+			</munit:set-event>
+			<flow-ref doc:name="Flow Reference" doc:id="018ef2a2-e1fc-48e0-8dfb-75aeec3399b8" name="impl-create-customer"/>
+		</munit:execution>
+	</munit:test>
 </mule>
