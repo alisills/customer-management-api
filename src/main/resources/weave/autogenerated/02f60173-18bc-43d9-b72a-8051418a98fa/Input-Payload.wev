@@ -1,0 +1,10 @@
+%dw 2.0
+
+type auto_02f60173_18bc_43d9_b72a_8051418a98fa_Input_Payload = {|
+  firstName: String, 
+  lastName: String, 
+  email: String, 
+  phone: String, 
+  city: String
+|}
+

@@ -146,4 +146,52 @@ http://www.mulesoft.org/schema/mule/munit-tools http://www.mulesoft.org/schema/m
 		</munit:execution>
 	</munit:test>
 	<!-- T6: update a linked customer updates the Salesforce Account -->
+	<munit:test name="update-customer-updates-salesforce-account" doc:id="42abe792-2c48-420a-ac8b-3e80b27bf2eb" description="Updating a linked customer calls Salesforce update, not create">
+		<munit:behavior >
+			<munit-tools:mock-when doc:name="Select Customer by ID" doc:id="1e4912b6-4cec-442e-916c-0808984c46bc" processor="db:select">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="Select customer by ID" attributeName="doc:name" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:payload value="#[[{&#10;	id: 'C1001',&#10;	first_name: 'Asha',&#10;	last_name: 'Rao',&#10;	email: 'asha.rao@example.com',&#10;	phone: '+91-98450-11111',&#10;	city: 'Pune',&#10;	sf_account_id: '001TESTACCOUNT0002'&#10;}]]" />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+			<munit-tools:mock-when doc:name="Email Used by Another Customer?" doc:id="ae5a1885-a146-44c7-b80d-a726ea959b7f" processor="db:select">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="Email used by another customer?" attributeName="doc:name" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:payload value="#[[]]" />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+			<munit-tools:mock-when doc:name="Update Customer" doc:id="d672d98c-86bc-4fe6-b15e-69fda243cc22" processor="db:update">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="Update customer" attributeName="doc:name" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:payload value="#[{affectedRows: 1}]" />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+			<munit-tools:mock-when doc:name="Update Salesforce" doc:id="df86f3bc-1bb1-4b77-8c6f-8fc26829c76f" processor="salesforce:update">
+				<munit-tools:then-return >
+					<munit-tools:payload value="#[{&#10;	successful: true,&#10;	items: [{&#10;		id: '001TESTACCOUNT0002',&#10;		successful: true&#10;	}]&#10;}]" />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+		</munit:behavior>
+		<munit:execution >
+			<munit:set-event doc:name="PUT C1001" doc:id="f2335de6-c56c-4212-9a54-72b745f1aaf4" >
+				<munit:payload value="#[{&#10;	firstName: 'Asha',&#10;	lastName: 'Rao',&#10;	email: 'asha.rao@example.com',&#10;	phone: '+91-98450-11112',&#10;	city: 'Mumbai'&#10;}]" />
+				<munit:attributes value="#[{ uriParams: { id: 'C1001'}}]" />
+			</munit:set-event>
+			<flow-ref doc:name="Update Customer" doc:id="fade5cd0-c7df-4cb8-a11e-a52d3f9730f9" name="impl-update-customer"/>
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:assert-equals doc:name="City" doc:id="f5cb2a63-b07c-4b11-bebc-e11640d91684" actual="#[payload.city]" expected="#[Mumbai]"/>
+			<munit-tools:assert-equals doc:name="Salesforce Account ID" doc:id="65027aed-3fba-4b0f-afc5-42e192a599fe" actual="#[payload.sfAccountId]" expected="#['001TESTACCOUNT0002']"/>
+			<munit-tools:assert-equals doc:name="Salesforce Sync" doc:id="c5c75722-d651-41ef-824c-8e7a59348e7e" actual="#[payload.salesforceSync]" expected="#['SYNCED']"/>
+			<munit-tools:verify-call doc:name="Update Salesforce" doc:id="af1ad884-af0b-45a2-8e5e-0693da65afff" processor="salesforce:update"/>
+			<munit-tools:verify-call doc:name="Create Salesforce" doc:id="cf3a267a-0bb7-4c5d-9999-6bcac97707ec" processor="salesforce:create" times="0"/>
+		</munit:validation>
+	</munit:test>
+	
 </mule>

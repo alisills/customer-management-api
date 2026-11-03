@@ -1,0 +1,4 @@
+%dw 2.0
+
+type auto_02f60173_18bc_43d9_b72a_8051418a98fa_Output_Variables_existingCustomers = Array<{| id: String |}>
+
