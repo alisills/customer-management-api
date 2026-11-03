@@ -1,0 +1,233 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:munit="http://www.mulesoft.org/schema/mule/munit" xmlns:munit-tools="http://www.mulesoft.org/schema/mule/munit-tools"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xsi:schemaLocation="
+		http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+		http://www.mulesoft.org/schema/mule/munit http://www.mulesoft.org/schema/mule/munit/current/mule-munit.xsd
+		http://www.mulesoft.org/schema/mule/munit-tools  http://www.mulesoft.org/schema/mule/munit-tools/current/mule-munit-tools.xsd">
+	<munit:config name="new-test-suite.xml" />
+	<munit:test name="create-customer-syncs-salesforce" doc:id="b262f668-37f9-4f12-a4d9-7f978bcaf035" description="A new customer is inserted, an Account is created, and its ID is stored" >
+		<munit:behavior >
+			<munit-tools:mock-when doc:name="Find by Email" doc:id="75fcd2ba-e07e-4b91-9c51-c0f1283a1638" processor="db:select" >
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="Find by email" attributeName="doc:name" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:payload value="#[[]]" />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+			<munit-tools:mock-when doc:name="Insert Customer" doc:id="3a23eef7-43c6-4617-8292-e350295285e9" processor="db:insert" >
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="Insert customer" attributeName="doc:name" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:payload value="#[{affectedRows: 1}]" />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+			<munit-tools:mock-when doc:name="salesforce:create" doc:id="142aac50-5db6-4e11-b200-43578b487d9e" processor="salesforce:create" >
+				<munit-tools:then-return >
+					<munit-tools:payload value="#[[{&#10;	successful: true,&#10;	items: [{&#10;		id: '001TESTACCOUNT0001',&#10;		successful: true&#10;	}]&#10;}]]" />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+			<munit-tools:mock-when doc:name="Save Salesforce ID" doc:id="3934472c-40ff-413a-a4ee-279a422281e7" processor="db:update" >
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="Save Salesforce ID" attributeName="doc:name" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:payload value="#[[{affectedRows: 1}]]" />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+		</munit:behavior>
+		<munit:execution >
+			<munit:set-event doc:name="New Customer Request" doc:id="82b31055-e3ce-4d28-b443-18924ac3c38a" >
+				<munit:payload value="#[{&#10;	firstName: ' Ravi',&#10;	lastName: 'Kumar',&#10;	email: 'Ravi.Kumar@example.com',&#10;	city: 'Chennai'&#10;}]" />
+			</munit:set-event>
+			<flow-ref doc:name="Create Customer" doc:id="199db718-65b0-4922-8345-9d510d68d1c9" name="impl-create-customer" />
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:assert-that doc:name="Status 20" doc:id="8e6a3dba-4346-4b3c-8a91-edd760e45c38" expression="#[vars.httpStatus]" is="#[MunitTools::equalTo(201)]" />
+			<munit-tools:assert-equals doc:name="First Name" doc:id="6282884e-0b3a-4b72-8df7-555a13e90cfe" actual="#[payload.firstName]" expected="#['Ravi']" />
+			<munit-tools:assert-equals doc:name="Email" doc:id="c598608a-3b0f-4ae9-87eb-71db405b6457" actual="#[payload.email]" expected="#['ravi.kumar@example.com']" />
+			<munit-tools:assert-equals doc:name="Salesforce ID" doc:id="8a9e63a0-ab0e-4218-ac65-759989745ce0" actual="#[payload.sfAccountId]" expected="#['001TESTACCOUNT0001']" />
+			<munit-tools:assert-equals doc:name="Salesforce Synced?" doc:id="3b2a0d70-4dfa-43f9-be56-c269dd8d9836" actual="#[payload.salesforceSync]" expected="#['SYNCED']" />
+			<munit-tools:verify-call doc:name="db:insert" doc:id="0dd7f105-eff7-47d7-a344-74723bc13cbe" processor="db:insert" />
+			<munit-tools:verify-call doc:name="db:update" doc:id="06ecfffb-5a66-4635-bc8b-76d70e30314f" processor="db:insert" >
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="Save Salesforce ID" attributeName="doc:name" />
+				</munit-tools:with-attributes>
+			</munit-tools:verify-call>
+		</munit:validation>
+	</munit:test>
+	<munit:test name="create-customer-salesforce-down-still-saves" doc:id="3f24b8f4-ea37-48b4-8726-f58c4ffaa1bc" description="If Salesforce fails, the customer is still saved and the response reports FAILED" >
+		<munit:behavior >
+			<munit-tools:mock-when doc:name="Find by Email" doc:id="c1c0cbf4-07a3-4a78-a720-835a187a407d" processor="db:select" >
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="Find by Email" attributeName="doc:name" />
+					<munit-tools:with-attribute whereValue="Find by Email" attributeName="doc:name" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:payload value="#[[]]" />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+			<munit-tools:mock-when doc:name="Insert Customer" doc:id="97b7f80c-0273-444d-8c49-eb868cd145ce" processor="db:insert" >
+				<munit-tools:then-return >
+					<munit-tools:payload value="#[{ affectedRows: 1}]" />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+			<munit-tools:mock-when doc:name="Create Error" doc:id="606a3602-fbec-43af-b1aa-557301e7e2ff" processor="salesforce:create" >
+				<munit-tools:then-return >
+					<munit-tools:error typeId="SALESFORCE:CONNECTIVITY" />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+		</munit:behavior>
+		<munit:execution >
+			<munit:set-event doc:name="New Customer Request" doc:id="abc3dbe2-ed21-461b-9d3b-285a8468fcc5" >
+				<munit:payload value="#[{&#10;	firstName: 'Ravi',&#10;	lastName: 'Kumar',&#10;	email: 'ravi.kumar@example.com'&#10;}]" />
+			</munit:set-event>
+			<flow-ref doc:name="Create Customer" doc:id="428f4fc1-fc2b-4fcd-afb4-a1582df6abf1" name="impl-create-customer" />
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:assert-that doc:name="Status 20" doc:id="9db5165c-d761-4c4c-a9be-c2d3c7719438" expression="#[vars.httpStatus]" is="#[MunitTools::equalTo(201)]" />
+			<munit-tools:assert-equals doc:name="Salesforce Failed" doc:id="f44a1a21-145b-42f4-a25d-18c7e6d34668" actual="#[payload.salesforceSync]" expected="#['FAILED']" />
+			<munit-tools:assert-that doc:name="Salesforce ID Null" doc:id="bd512f10-d07e-429e-93df-c23d96e33cab" expression="#[payload.sfAccountId]" is="#[MunitTools::nullValue()]" />
+			<munit-tools:verify-call doc:name="db:insert" doc:id="c85f4c34-430d-45a0-8a8e-c9bfb99968e4" processor="db:insert" />
+			<munit-tools:verify-call doc:name="db:update" doc:id="aacf3371-da2a-42dd-a997-10966cf5e722" processor="db:update" times="0" />
+		</munit:validation>
+	</munit:test>
+	<munit:test name="create-customer-duplicate-email-raises-duplicate" doc:id="3c058c74-bba7-4810-8806-053212e92440" description="An exisiting email raises CUSTOMER:DUPLICATE" expectedErrorType="CUSTOMER:DUPLICATE" >
+		<munit:behavior >
+			<munit-tools:mock-when doc:name="Mock when" doc:id="f3cd9113-0316-4ce3-be08-d2abcbb31c9f" processor="db:select" >
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="Find by email" attributeName="doc:name" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:payload value="#[{ id: 'C1001'}]" />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+		</munit:behavior>
+		<munit:execution >
+			<munit:set-event doc:name="Duplicate Request" doc:id="9f22fb7c-0248-4d3e-87b4-efcb018efb58" >
+				<munit:payload value="#[{&#10;	firstName: 'Asha',&#10;	lastName: 'Rao',&#10;	email: 'asha.rao@example.com'&#10;}]" />
+			</munit:set-event>
+			<flow-ref doc:name="Create Customer" doc:id="81affe31-a9db-4d6c-8fe4-17c61bedaa48" name="impl-create-customer" />
+		</munit:execution>
+	</munit:test>
+	<munit:test name="create-customer-blank-name-raises-invalid-request" doc:id="672eb242-ebe6-46e4-9c4a-5279ad63e2be" description="A first name of only spaces raises CUSTOMER:INVALID_REQUEST" >
+		<munit:execution >
+			<munit:set-event doc:name="Blank First Name" doc:id="d371fb70-53a8-42b2-ac4c-a7604759f60f" >
+				<munit:payload value="#[{&#10;	firstName: ' ',&#10;	lastName: 'Kumar',&#10;	email: 'ravi.kumar@example.com'&#10;}]" />
+			</munit:set-event>
+			<flow-ref doc:name="Create Customer" doc:id="07b804a7-2812-4216-9c71-edfeda783910" name="impl-create-customer" />
+		</munit:execution>
+	</munit:test>
+	<munit:test name="get-customer-unknown-raises-not-found" doc:id="50e4cf8a-f73b-4530-8e73-60ca5e2fd5fb" description="An unknown id raises CUSTOMER:NOT_FOUND" expectedErrorType="CUSTOMER:NOT_FOUND" >
+		<munit:behavior >
+			<munit-tools:mock-when doc:name="Select Customer by ID" doc:id="af843f96-0101-40f9-ac54-6c85ef9ff728" processor="db:select" >
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="Select customer by ID" attributeName="doc:name" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:payload value="#[[]]" />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+		</munit:behavior>
+		<munit:execution >
+			<munit:set-event doc:name="GET C999" doc:id="18e9972b-0a2b-469a-a682-8b65bcfb5618" >
+				<munit:attributes value="#[{&#10;	uriParams: {id: 'C9999'}&#10;}]" />
+			</munit:set-event>
+			<flow-ref doc:name="GET Customer" doc:id="49246838-0c07-461e-8407-344af84e50e7" name="impl-get-customer" />
+		</munit:execution>
+	</munit:test>
+	<munit:test name="update-customer-updates-salesforce-account" doc:id="a5148cac-51e9-4a6b-98fb-97f27ba2e805" description="Updating a linked customer calls Salesforce update, not create" >
+		<munit:behavior >
+			<munit-tools:mock-when doc:name="Select Customer by ID" doc:id="e3f67ca9-499a-4010-aa6c-77790346f63c" processor="db:select" >
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="Select customer by ID" attributeName="doc:name" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:payload value="#[[{&#10;	id: 'C1001',&#10;	first_name: 'Asha',&#10;	last_name: 'Rao',&#10;	email: 'asha.rao@example.com',&#10;	phone: '+91-98450-11111',&#10;	city: 'Pune',&#10;	sf_account_id: '001TESTACCOUNT0002'&#10;}]]" />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+			<munit-tools:mock-when doc:name="Email Used by Another Customer?" doc:id="e20e07f1-fafa-4458-958f-54781c9f3df1" processor="db:select" >
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="Email used by another customer?" attributeName="doc:name" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:payload value="#[[]]" />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+			<munit-tools:mock-when doc:name="Update Customer" doc:id="ebb8ef0d-5734-4538-b30d-6ba5bd9b7d78" processor="db:update" >
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="Update customer" attributeName="doc:name" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:payload value="#[{affectedRows: 1}]" />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+			<munit-tools:mock-when doc:name="Update Salesforce" doc:id="e6f58218-73b7-4954-a3b5-ad66a04fe210" processor="salesforce:update" >
+				<munit-tools:then-return >
+					<munit-tools:payload value="#[{&#10;	successful: true,&#10;	items: [{&#10;		id: '001TESTACCOUNT0002',&#10;		successful: true&#10;	}]&#10;}]" />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+		</munit:behavior>
+		<munit:execution >
+			<munit:set-event doc:name="PUT C100" doc:id="bdb31a17-e0ac-4075-bd97-b3fc7d45b362" >
+				<munit:payload value="#[{&#10;	firstName: 'Asha',&#10;	lastName: 'Rao',&#10;	email: 'asha.rao@example.com',&#10;	phone: '+91-98450-11112',&#10;	city: 'Mumbai'&#10;}]" />
+				<munit:attributes value="#[{ uriParams: { id: 'C1001'}}]" />
+			</munit:set-event>
+			<flow-ref doc:name="UPDATE Customer" doc:id="bd4c3257-ffe6-4b73-a8a3-c06847d219a9" name="impl-update-customer" />
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:assert-equals doc:name="City" doc:id="ccf014ae-c2ab-4a7d-96ad-22bbe6bcc675" actual="#[payload.city]" expected="#[Mumbai]" />
+			<munit-tools:assert-equals doc:name="Salesforce Account ID" doc:id="2327fadd-6eff-45b6-ba4c-67ea340b2e74" actual="#[payload.sfAccountId]" expected="#['001TESTACCOUNT0002']" />
+			<munit-tools:assert-equals doc:name="Salesforce Sync" doc:id="58b8fe31-becc-4f46-844b-257058f193bb" actual="#[payload.salesforceSync]" expected="#['SYNCED']" />
+			<munit-tools:verify-call doc:name="Update Salesforce" doc:id="ad6879b7-e5ad-4cf7-9be4-3cf4daeda763" processor="salesforce:update" />
+			<munit-tools:verify-call doc:name="Create Salesforce" doc:id="6ae49bbc-d7d2-4082-a1b9-af64e0778709" processor="salesforce:create" times="0" />
+		</munit:validation>
+	</munit:test>
+	<munit:test name="delete-customer-returns-20" doc:id="1005311c-140f-47fb-b061-6ac1cc86ef05" description="Deleting an exisitng customer sets status 204" >
+		<munit:behavior >
+			<munit-tools:mock-when doc:name="Delete Existing Customer" doc:id="22a9bdb0-2615-467e-b269-347c08e5f445" processor="db:delete" >
+				<munit-tools:then-return >
+					<munit-tools:payload value="#[{affectedRows: 1}]" />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+		</munit:behavior>
+		<munit:execution >
+			<munit:set-event doc:name="DELETE C100" doc:id="95bc4fea-e2dd-4229-af0e-c25bf536b07f" >
+				<munit:attributes value="#[{ uriParams: { id: 'C1003'}}]" />
+			</munit:set-event>
+			<flow-ref doc:name="DELETE customer" doc:id="8ffc16dd-5f9c-4f19-b155-15a6b19c4db3" name="impl-delete-customer" />
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:assert-that doc:name="Assert that" doc:id="a7b1b721-d635-49e6-9a08-238e94396479" expression="#[vars.httpStatus]" is="#[MunitTools::equalTo(204)]" />
+		</munit:validation>
+	</munit:test>
+	<munit:test name="search-customers-maps-rows" doc:id="7c153233-caee-4875-90a0-aeea0de0454e" description="Rows from the database are returned in API format" >
+		<munit:behavior >
+			<munit-tools:mock-when doc:name="Search Customers" doc:id="b6001afd-b5ab-4af8-8778-616831e34e94" processor="db:select" >
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="Search customers" attributeName="doc:name" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:payload value="#[{&#10;	id: 'C1003',&#10;	first_name: 'Meera',&#10;	last_name: 'Iyer',&#10;	email: 'meera.iyer@example.com',&#10;	phone: null,&#10;	city: 'Pune',&#10;	sf_account_id: null&#10;}]" />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+		</munit:behavior>
+		<munit:execution >
+			<munit:set-event doc:name="GET ?city=pune" doc:id="c70f0f2c-dfbe-4d99-a3a0-8354eb6e25f9" >
+				<munit:attributes value="#[{ queryParams: {city: 'pune'}}]" />
+			</munit:set-event>
+			<flow-ref doc:name="Search Customers" doc:id="54c32d4e-b21f-4a74-9301-569374da7d38" name="impl-search-customers" />
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:assert-that doc:name="Payload Size" doc:id="125fce8d-0744-4734-b7bf-3153601ccb9b" expression="#[sizeOf(payload)]" is="#[MunitTools::equalTo(1)]" />
+			<munit-tools:assert-equals doc:name="First Names" doc:id="12f011cb-0d74-4611-8c0a-d34a7aabd401" actual="#[payload[0].firstName]" expected="#['Meera']" />
+			<munit-tools:assert-equals doc:name="Assert equals" doc:id="c4111f7f-52a5-417f-aeb1-7476a5082eb9" actual="#[payload[0].phone]" expected="#['']" />
+		</munit:validation>
+	</munit:test>
+
+
+</mule>
