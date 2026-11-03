@@ -60,8 +60,8 @@ http://www.mulesoft.org/schema/mule/munit-tools http://www.mulesoft.org/schema/m
 				</munit-tools:with-attributes>
 			</munit-tools:verify-call>
 		</munit:validation>
-	<!-- T2: create, Salesforce is down (Test 5 from Chapter 14) -->
 	</munit:test>
+	<!-- T2: create, Salesforce is down (Test 5 from Chapter 14) -->
 	<munit:test name="create-customer-salesforce-down-still-saves" doc:id="51e62b99-fd98-4a90-8e59-5018ba59da63" description="If Salesforce fails, the customer is still saved and the response reports FAILED">
 		<munit:behavior >
 			<munit-tools:mock-when doc:name="Find by Email" doc:id="cc14d225-802e-40a8-a82f-fa4034268d0b" processor="db:select">
@@ -97,5 +97,24 @@ http://www.mulesoft.org/schema/mule/munit-tools http://www.mulesoft.org/schema/m
 			<munit-tools:verify-call doc:name="db:insert" doc:id="f75455ad-6a25-40db-a1aa-27969435c155" processor="db:insert"/>
 			<munit-tools:verify-call doc:name="db:update" doc:id="f818b51a-3194-401c-a7ba-4f43629a756e" processor="db:update" times="0"/>
 		</munit:validation>
+	</munit:test>
+	<!-- T3: duplicate email -->
+	<munit:test name="create-customer-duplicate-email-raises-duplicate" doc:id="a396bc62-e5a2-4b0e-bdd3-1cf4f1911898" description="An exisiting email raises CUSTOMER:DUPLICATE" expectedErrorType="CUSTOMER:DUPLICATE">
+		<munit:behavior >
+			<munit-tools:mock-when doc:name="Mock when" doc:id="caabfd7c-1bea-4e5f-8897-505d1b40b0bd" processor="db:select">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="Find by email" attributeName="doc:name" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:payload value="#[{ id: 'C1001'}]" />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+		</munit:behavior>
+		<munit:execution >
+			<munit:set-event doc:name="Duplicate Request" doc:id="ed047369-3308-4d14-b55d-3f4023f9636e" >
+				<munit:payload value="#[{&#10;	firstName: 'Asha',&#10;	lastName: 'Rao',&#10;	email: 'asha.rao@example.com'&#10;}]" />
+			</munit:set-event>
+			<flow-ref doc:name="Flow Reference" doc:id="4249aa08-8103-4b96-a9b5-260329312cc7" name="impl-create-customer"/>
+		</munit:execution>
 	</munit:test>
 </mule>
