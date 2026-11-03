@@ -5,6 +5,8 @@
 	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
 http://www.mulesoft.org/schema/mule/munit http://www.mulesoft.org/schema/mule/munit/current/mule-munit.xsd
 http://www.mulesoft.org/schema/mule/munit-tools http://www.mulesoft.org/schema/mule/munit-tools/current/mule-munit-tools.xsd">
+	
+	<!-- T1: create, Salesforce succeeds -->
 	<munit:test name="create-customer-syncs-salesforce" doc:id="21cfd573-1d0d-43fb-9083-cdb4d72793e4" description="A new customer is inserted, an Account is created, and its ID is stored">
 		<munit:behavior >
 			<munit-tools:mock-when doc:name="Find by Email" doc:id="a8528757-5859-4bfd-af55-c3810d522a07" processor="db:select">
@@ -57,6 +59,43 @@ http://www.mulesoft.org/schema/mule/munit-tools http://www.mulesoft.org/schema/m
 					<munit-tools:with-attribute whereValue="Save Salesforce ID" attributeName="doc:name" />
 				</munit-tools:with-attributes>
 			</munit-tools:verify-call>
+		</munit:validation>
+	<!-- T2: create, Salesforce is down (Test 5 from Chapter 14) -->
+	</munit:test>
+	<munit:test name="create-customer-salesforce-down-still-saves" doc:id="51e62b99-fd98-4a90-8e59-5018ba59da63" description="If Salesforce fails, the customer is still saved and the response reports FAILED">
+		<munit:behavior >
+			<munit-tools:mock-when doc:name="Find by Email" doc:id="cc14d225-802e-40a8-a82f-fa4034268d0b" processor="db:select">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="Find by Email" attributeName="doc:name" />
+					<munit-tools:with-attribute whereValue="Find by Email" attributeName="doc:name" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:payload value="#[[]]" />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+			<munit-tools:mock-when doc:name="Insert Customer" doc:id="a11e5133-9686-4d57-be57-035f7097d323" processor="db:insert">
+				<munit-tools:then-return >
+					<munit-tools:payload value="#[{ affectedRows: 1}]" />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+			<munit-tools:mock-when doc:name="Create Error" doc:id="f663b686-6d4d-410e-b28b-eb93608a3494" processor="salesforce:create">
+				<munit-tools:then-return >
+					<munit-tools:error typeId="SALESFORCE:CONNECTIVITY" />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+		</munit:behavior>
+		<munit:execution >
+			<munit:set-event doc:name="New Customer Request" doc:id="1745f30f-8940-4474-b5ac-f7f1d8bdde32" >
+				<munit:payload value="#[{&#10;	firstName: 'Ravi',&#10;	lastName: 'Kumar',&#10;	email: 'ravi.kumar@example.com'&#10;}]" />
+			</munit:set-event>
+			<flow-ref doc:name="Flow Reference" doc:id="e59d4771-7802-4035-b872-6898dba55bc5" name="impl-create-customer"/>
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:assert-that doc:name="Status 201" doc:id="ca141773-a449-4dab-847a-5537abc6ea86" expression="#[vars.httpStatus]" is="#[MunitTools::equalTo(201)]"/>
+			<munit-tools:assert-equals doc:name="Salesforce Failed" doc:id="053a8ec8-919c-4a58-b963-a79ead3be9cd" actual="#[payload.salesforceSync]" expected="#['FAILED']"/>
+			<munit-tools:assert-that doc:name="Salesforce ID Null" doc:id="f9725ace-2601-4a59-8ee0-29f46822d970" expression="#[payload.sfAccountId]" is="#[MunitTools::nullValue()]"/>
+			<munit-tools:verify-call doc:name="db:insert" doc:id="f75455ad-6a25-40db-a1aa-27969435c155" processor="db:insert"/>
+			<munit-tools:verify-call doc:name="db:update" doc:id="f818b51a-3194-401c-a7ba-4f43629a756e" processor="db:update" times="0"/>
 		</munit:validation>
 	</munit:test>
 </mule>
