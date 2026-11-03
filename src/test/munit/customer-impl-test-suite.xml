@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:munit="http://www.mulesoft.org/schema/mule/munit" xmlns:munit-tools="http://www.mulesoft.org/schema/mule/munit-tools"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xsi:schemaLocation="
+		http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+		http://www.mulesoft.org/schema/mule/munit http://www.mulesoft.org/schema/mule/munit/current/mule-munit.xsd
+		http://www.mulesoft.org/schema/mule/munit-tools  http://www.mulesoft.org/schema/mule/munit-tools/current/mule-munit-tools.xsd">
+	<munit:config name="customer-impl-test-suite.xml" />
+	<munit:test name="customer-impl-test-suite-sync-salesforce-account-flowTest" doc:id="9df67f2b-3a70-483f-b3c0-bb099149e4e5" description="Test">
+		<munit:execution >
+			<flow-ref doc:name="Flow-ref to sync-salesforce-account-flow" doc:id="2d13754c-6e3c-478e-bd69-a0a236af5ca5" name="sync-salesforce-account-flow"/>
+		</munit:execution>
+	</munit:test>
+
+
+</mule>
