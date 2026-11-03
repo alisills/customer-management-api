@@ -142,7 +142,7 @@ http://www.mulesoft.org/schema/mule/munit-tools http://www.mulesoft.org/schema/m
 			<munit:set-event doc:name="GET C9999" doc:id="d9aa14e4-9156-4f76-a0e1-1782d6ea9a27" >
 				<munit:attributes value="#[{&#10;	uriParams: {id: 'C9999'}&#10;}]" />
 			</munit:set-event>
-			<flow-ref doc:name="Get Customer" doc:id="10b415b5-aadd-49ec-b6ad-e3e137f9462e" name="impl-get-customer"/>
+			<flow-ref doc:name="GET Customer" doc:id="10b415b5-aadd-49ec-b6ad-e3e137f9462e" name="impl-get-customer"/>
 		</munit:execution>
 	</munit:test>
 	<!-- T6: update a linked customer updates the Salesforce Account -->
@@ -183,7 +183,7 @@ http://www.mulesoft.org/schema/mule/munit-tools http://www.mulesoft.org/schema/m
 				<munit:payload value="#[{&#10;	firstName: 'Asha',&#10;	lastName: 'Rao',&#10;	email: 'asha.rao@example.com',&#10;	phone: '+91-98450-11112',&#10;	city: 'Mumbai'&#10;}]" />
 				<munit:attributes value="#[{ uriParams: { id: 'C1001'}}]" />
 			</munit:set-event>
-			<flow-ref doc:name="Update Customer" doc:id="fade5cd0-c7df-4cb8-a11e-a52d3f9730f9" name="impl-update-customer"/>
+			<flow-ref doc:name="UPDATE Customer" doc:id="fade5cd0-c7df-4cb8-a11e-a52d3f9730f9" name="impl-update-customer"/>
 		</munit:execution>
 		<munit:validation >
 			<munit-tools:assert-equals doc:name="City" doc:id="f5cb2a63-b07c-4b11-bebc-e11640d91684" actual="#[payload.city]" expected="#[Mumbai]"/>
@@ -193,5 +193,23 @@ http://www.mulesoft.org/schema/mule/munit-tools http://www.mulesoft.org/schema/m
 			<munit-tools:verify-call doc:name="Create Salesforce" doc:id="cf3a267a-0bb7-4c5d-9999-6bcac97707ec" processor="salesforce:create" times="0"/>
 		</munit:validation>
 	</munit:test>
-	
+	<!-- T7: delete -->
+	<munit:test name="delete-customer-returns-204" doc:id="c28f5492-b5cc-452e-8138-aefe6a390171" description="Deleting an exisitng customer sets status 204">
+		<munit:behavior >
+			<munit-tools:mock-when doc:name="Delete Existing Customer" doc:id="bcdfa386-dde8-46f5-b5d9-f1c5d7c38537" processor="db:delete">
+				<munit-tools:then-return >
+					<munit-tools:payload value="#[{affectedRows: 1}]" />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+		</munit:behavior>
+		<munit:execution >
+			<munit:set-event doc:name="DELETE C1003" doc:id="97b9ed6e-5fbe-4520-8779-fc0d19a5ba24" >
+				<munit:attributes value="#[{ uriParams: { id: 'C1003'}}]" />
+			</munit:set-event>
+			<flow-ref doc:name="DELETE customer" doc:id="df8b59b4-13b9-4d34-9f3e-2cd237ec20a0" name="impl-delete-customer"/>
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:assert-that doc:name="Assert that" doc:id="9c702008-7005-441e-b9e1-debba11ce8db" expression="#[vars.httpStatus]" is="#[MunitTools::equalTo(204)]"/>
+		</munit:validation>
+	</munit:test>
 </mule>
