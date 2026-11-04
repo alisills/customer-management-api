@@ -7,7 +7,7 @@ API built with API life cycle manipulating data using MySQL database and Salesfo
 
 ### 🔹 API Design
 - **Design Center** - Used to author the API specification in RAML 1.0.
-- **RAML 1.0** -  Defined GET, POST, PUT, and DELETE methods to read, create, update, and delete customer data.
+- **RAML 1.0** -  Defined `GET`, `POST`, `PUT`, and `DELETE` methods to read, create, update, and delete customer data.
 - **APIkit** - Generated flow scaffolding from RAML and enabled request routing.
 - **Anypoint Studio** - Implemented Mule flows using Database Connector,Salesforce Connector, and Choice Router with Raise Error for conditional error handling.
 ### 🔹 Integration Development
@@ -19,7 +19,7 @@ API built with API life cycle manipulating data using MySQL database and Salesfo
 ### 🔹Security & Configuration
 - **Secure Configuration Properties** - Encrypted MySQL database password, Salesforce password, and Salesforce security token using the Secure Properties Generator and configured MuleSoft to access them securely.
 ### 🔹 Testing & Build
-- **Postamn** -
+- **Postman** - Created a collection using an Postman environment variables to manually test `GET`, `PUT`, `POST`, `DELETE`, and verify `200`, `201`, `400`, `404`, `405`, and `409` status codes.
 - **MUnit** -
 ## ⚙️ Features
 ## ⏳ The Process
