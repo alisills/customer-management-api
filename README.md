@@ -14,8 +14,10 @@ API built with API life cycle manipulating data using MySQL database and Salesfo
 - **DataWeave 2.0** - Developed a function to convert a row from the `customers` table into the API's customer object and used Transform Message components to map and construct customer data.
 - **Mule Runtime** - Executes Mule flows to create or update accounts in Salesforce and create, update, retrieve, and delete customers from MySQL.
 ### 🔹 Data & Connectivity
-- **MySQL** -
-- **Salesforce Connector** -
+- **MySQL** - Used as the relational database to store and access customer records via Database Connector.
+- **Salesforce Connector** - Integrated with the Salesforce CRM to create and update Salesforce Account records.
+### 🔹Security & Configuration
+- **Secure Configuration Properties** - Encrypted MySQL database password, Salesforce password, and Salesforce security token using the Secure Properties Generator and configured MuleSoft to access them securely.
 ### 🔹 Testing & Build
 - **Postamn** -
 - **MUnit** -
