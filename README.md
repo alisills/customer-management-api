@@ -20,7 +20,7 @@ API built with API life cycle manipulating data using MySQL database and Salesfo
 - **Secure Configuration Properties** - Encrypted MySQL database password, Salesforce password, and Salesforce security token using the Secure Properties Generator and configured MuleSoft to access them securely.
 ### 🔹 Testing & Build
 - **Postman** - Created a collection using an Postman environment variables to manually test `GET`, `PUT`, `POST`, `DELETE`, and verify `200`, `201`, `400`, `404`, `405`, and `409` status codes.
-- **MUnit** -
+- **MUnit** - Developed automated tests to validate business logic using Mock When, Assert That, Assert Equals, and Verify Call to confirm expected results.
 ## ⚙️ Features
 ## ⏳ The Process
 ## 📗 What I learned
