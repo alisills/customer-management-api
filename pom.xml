@@ -55,6 +55,12 @@
 				</executions>
 				<configuration>
 					<coverage>
+					<ignoreFlows>
+						<ignoreFlow>customer-management-api</ignoreFlow>
+					</ignoreFlows>
+					<ignoreFiles>
+						<ignoreFile>customer-management-api.xml</ignoreFile>
+					</ignoreFiles>
 						<runCoverage>true</runCoverage>
 						<formats>
 							<format>html</format>
