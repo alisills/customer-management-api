@@ -11,8 +11,8 @@ API built with API life cycle manipulating data using MySQL database and Salesfo
 - **APIkit** - Generated flow scaffolding from RAML and enabled request routing.
 - **Anypoint Studio** - Implemented Mule flows using Database Connector,Salesforce Connector, and Choice Router with Raise Error for conditional error handling.
 ### 🔹 Integration Development
-- **Anypoint Integration** -
-- **Dataweave 2.0** - 
+- **DataWeave 2.0** - Developed a function to convert a row from the `customers` table into the API's customer object and used Transform Message components to map and construct customer data.
+- **Mule Runtime** - Executes Mule flows to create or update accounts in Salesforce and create, update, retrieve, and delete customers from MySQL.
 ### 🔹 Data & Connectivity
 - **MySQL** -
 - **Salesforce Connector** -
