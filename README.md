@@ -8,7 +8,8 @@ API built with API life cycle manipulating data using MySQL database and Salesfo
   <summary><b>Click to expand Screenshot</b></summary>
   <br>
   <p align="center">
-    <img src="assets\salesforce-sync-implementation-flow.png" width="750" alt="API Salesforce Sync Flow">
+    <img src="assets\cross-system-customer-creation-munit-tested.png" width="750" alt="Customer Creation Flow">
+    <img src="assets\salesforce-sync-implementation-flow.png" width="750" alt="Salesforce Sync Flow">
   </p>
 </details>
 
