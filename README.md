@@ -1,6 +1,15 @@
 # customer-management-api
 API built with API life cycle manipulating data using MySQL database and Salesforce. Design center was used to develop the RAML and then added to AnypointStudio using APIkit. 
 
+## 📂 Detailed API Flow
+<details>
+  <summary><b>Click to expand Screenshot</b></summary>
+  <br>
+  <p align="center">
+    <img src="" width="750" alt="API FLow">
+  </p>
+</details>
+
 ## 💾 Technologies
 
 ![MySQL](https://img.shields.io/badge/MySQL-4479A1?style=for-the-badge&logo=mysql&logoColor=white) ![Salesforce](https://img.shields.io/badge/Salesforce-00A1E0?style=for-the-badge&logo=salesforce&logoColor=white)
@@ -21,8 +30,3 @@ API built with API life cycle manipulating data using MySQL database and Salesfo
 ### 🔹 Testing & Build
 - **Postman** - Created a collection using an Postman environment variables to manually test `GET`, `PUT`, `POST`, `DELETE`, and verify `200`, `201`, `400`, `404`, `405`, and `409` status codes.
 - **MUnit** - Developed automated tests to validate business logic using Mock When, Assert That, Assert Equals, and Verify Call to confirm expected results.
-## ⚙️ Features
-## ⏳ The Process
-## 📗 What I learned
-## 🏃 Running the Project
-## 🍿 Preview
