@@ -25,11 +25,11 @@
         </http:listener>
         <apikit:console config-ref="customer-management-api-config" />
     </flow>
-    <flow name="get:\customers:customer-management-api-config">
-        <flow-ref doc:name="Search Customers" doc:id="34123f42-c173-403c-824d-ffc757cc22cb" name="impl-search-customers"/>
+    <flow name="post:\customers:application\json:customer-management-api-config">
+        <flow-ref doc:name="Create Customer" doc:id="5793ed21-ea32-49d7-b8d5-83e6f3db3527" name="impl-create-customer" />
     </flow>
-	<flow name="post:\customers:application\json:customer-management-api-config">
-        <flow-ref doc:name="Create Customer" doc:id="5793ed21-ea32-49d7-b8d5-83e6f3db3527" name="impl-create-customer"/>
+	<flow name="get:\customers:customer-management-api-config">
+        <flow-ref doc:name="Search Customers" doc:id="34123f42-c173-403c-824d-ffc757cc22cb" name="impl-search-customers"/>
     </flow>
 	<flow name="get:\customers\(id):customer-management-api-config">
 		<flow-ref doc:name="Get Customer" doc:id="2155645a-121d-42b7-8078-c4e0be3ee166" name="impl-get-customer"/>
