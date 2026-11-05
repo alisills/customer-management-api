@@ -1,14 +1,23 @@
 # Customer Management API
 
-## 📈The Business Problem
-API built with API life cycle manipulating data using MySQL database and Salesforce. Design center was used to develop the RAML and then added to AnypointStudio using APIkit. 
+## 📈Business Problem
+### 🔹 The Problem
+Businesses that manage customer information across multiple systems, such as MySQL and Salesforce, may experience challenges with maintaining accurate and consistent customer data. This occurs when duplicate customer records are created and information is not properly managed between systems.
+### 🔹 Business Impact
+These challenges can result in duplicated information, inaccurate customer records, and inefficient business operations. This affects the organization's ability to retrieve accurate customer information and manage customer data across multiple systems.
+### 🔹 The Solution
+The customer-management-api addresses these challenges by integrating MySQL and Salesforce to manage customer information. The API allows users to create, retrieve, update, and delete customer records in MySQL while also creating customer Accounts in Salesforce. It checks for duplicate customer IDs and emails to help prevent duplicate records and uses error handling to return clear, readable error messages when integration operations fail.
 
 ## 📂 Detailed API Flow
 <details>
-  <summary><b>Click to expand Screenshot</b></summary>
+  <summary><b>Click to expand Screenshots</b></summary>
   <br>
   <p align="center">
-    <img src="" width="750" alt="API FLow">
+    <img src="assets\customer-management-api-post-apikit-route.png" width="750" alt="Route Customer Creation Flow">
+    <img src="assets\cross-system-customer-creation-munit-tested.png" width="750" alt="Customer Creation Flow">
+    <img src="assets\salesforce-sync-implementation-flow.png" width="750" alt="Salesforce Sync Flow">
+    <img src="assets\create-customer-syncs-salesforce-munit.png" width="750" alt="Create Customer Syncs Salesforce MUnit">
+    <img src="assets\postman-collection.png" width="750" alt="Postman Collection Snapshot">
   </p>
 </details>
 
@@ -27,8 +36,8 @@ API built with API life cycle manipulating data using MySQL database and Salesfo
 ### 🔹 Data & Connectivity
 - **MySQL** - Used as the relational database to store and access customer records via Database Connector.
 - **Salesforce Connector** - Integrated with the Salesforce CRM to create and update Salesforce Account records.
-### 🔹Security & Configuration
+### 🔹 Security & Configuration
 - **Secure Configuration Properties** - Encrypted MySQL database password, Salesforce password, and Salesforce security token using the Secure Properties Generator and configured MuleSoft to access them securely.
 ### 🔹 Testing & Build
-- **Postman** - Created a collection using an Postman environment variables to manually test `GET`, `PUT`, `POST`, `DELETE`, and verify `200`, `201`, `400`, `404`, `405`, and `409` status codes.
+- **Postman** - Created a collection using Postman environment variables to manually test `GET`, `PUT`, `POST`, `DELETE`, and verify `200`, `201`, `400`, `404`, `405`, and `409` status codes.
 - **MUnit** - Developed automated tests to validate business logic using Mock When, Assert That, Assert Equals, and Verify Call to confirm expected results.
