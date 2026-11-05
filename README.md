@@ -1,5 +1,14 @@
 # Customer Management API
-
+![DataWeave](https://img.shields.io/badge/DataWeave-2.0-087F8C?style=for-the-badge)
+![MuleSoft](https://img.shields.io/badge/MuleSoft-00A1DF?style=for-the-badge&logo=mulesoft&logoColor=white)
+![MUnit](https://img.shields.io/badge/MUnit-6554C0?style=for-the-badge)
+![MySQL](https://img.shields.io/badge/MySQL-4479A1?style=for-the-badge&logo=mysql&logoColor=white)
+![RAML](https://img.shields.io/badge/RAML-1.0-1666A9?style=for-the-badge)
+![Salesforce](https://img.shields.io/badge/Salesforce-00A1E0?style=for-the-badge&logo=salesforce&logoColor=white)
+## 🎯 Project Overview
+A MuleSoft REST API that integrates MySQL and Salesforce
+to manage customer records, detect duplicates, and
+automate customer creation across both systems.
 ## 📈 Business Problem
 ### 🔹 The Problem
 Businesses that manage customer information across multiple systems, such as MySQL and Salesforce, may experience challenges with maintaining accurate and consistent customer data. This occurs when duplicate customer records are created and information is not properly managed between systems.
@@ -68,13 +77,10 @@ The customer-management-api addresses these challenges by integrating MySQL and 
          width="750"
          alt="Postman Collection Snapshot">
   </p>
-
 </details>
 
 
 ## 💾 Technologies
-
-![MySQL](https://img.shields.io/badge/MySQL-4479A1?style=for-the-badge&logo=mysql&logoColor=white) ![Salesforce](https://img.shields.io/badge/Salesforce-00A1E0?style=for-the-badge&logo=salesforce&logoColor=white)
 
 ### 🔹 API Design
 - **Design Center** - Used to author the API specification in RAML 1.0.
