@@ -1,7 +1,12 @@
 # Customer Management API
 
-## 📈The Business Problem
-API built with API life cycle manipulating data using MySQL database and Salesforce. Design center was used to develop the RAML and then added to AnypointStudio using APIkit. 
+## 📈Business Problem
+### The Problem
+Businesses that manage customer information across multiple systems, such as MySQL and Salesforce, may experience challenges with maintaining accurate and consistent customer data. This occurs when duplicate customer records are created and information is not properly managed between systems.
+### Business Impact
+These challenges can result in duplicated information, inaccurate customer records, and inefficient business operations. This affects the organization's ability to retrieve accurate customer information and manage customer data across multiple systems.
+### The Solution
+The customer-management-api addresses these challenges by integrating MySQL and Salesforce to manage customer information. The API allows users to create, retrieve, update, and delete customer records in MySQL while also creating customer Accounts in Salesforce. It checks for duplicate customer IDs and emails to help prevent duplicate records and uses error handling to return clear, readable error messages when integration operations fail.
 
 ## 📂 Detailed API Flow
 <details>
