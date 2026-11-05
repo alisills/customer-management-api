@@ -10,6 +10,8 @@ API built with API life cycle manipulating data using MySQL database and Salesfo
   <p align="center">
     <img src="assets\cross-system-customer-creation-munit-tested.png" width="750" alt="Customer Creation Flow">
     <img src="assets\salesforce-sync-implementation-flow.png" width="750" alt="Salesforce Sync Flow">
+    <img src="assets\create-customer-syncs-salesforce-munit.png" width="750" alt="Create Customer Syncs Salesforce MUnit">
+    <img src="assets\postman-collection.png" width="750" alt="Postman Collection Snapshot">
   </p>
 </details>
 
