@@ -10,6 +10,12 @@ The customer-management-api addresses these challenges by integrating MySQL and 
 
 ## 📂 Detailed API Flow
 <details>
+  <summary><strong>Customer Creation Flow</strong></summary>
+  <p align="center">Demonstrates how the Mule flow processes customer creation requests across MySQL and Salesforce.</p>
+    <img src="assets\cross-system-customer-creation-munit-tested.png" width="750" alt="Customer Creation Flow">
+</details>
+
+<details>
   <summary><b>Click to expand Screenshots</b></summary>
   <br>
   <p align="center">
