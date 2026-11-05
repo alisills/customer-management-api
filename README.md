@@ -13,6 +13,7 @@ The customer-management-api addresses these challenges by integrating MySQL and 
   <summary><b>Click to expand Screenshots</b></summary>
   <br>
   <p align="center">
+    <img src="assets\customer-management-api-post-apikit-route.png" width="750" alt="Route Customer Creation Flow">
     <img src="assets\cross-system-customer-creation-munit-tested.png" width="750" alt="Customer Creation Flow">
     <img src="assets\salesforce-sync-implementation-flow.png" width="750" alt="Salesforce Sync Flow">
     <img src="assets\create-customer-syncs-salesforce-munit.png" width="750" alt="Create Customer Syncs Salesforce MUnit">
