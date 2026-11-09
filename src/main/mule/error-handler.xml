@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns:db="http://www.mulesoft.org/schema/mule/db"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd 
+http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd 
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd">
+<error-handler name="global-error-handler" doc:id="23793a29-3641-4702-a8a7-124661198e8a" >
+		<on-error-propagate enableNotifications="true" logException="false" doc:name="On Error Propagate" doc:id="063bad0a-8ba8-45d8-9eb0-d96da70ff0a1" when="#[error.errorType.namespace == 'APIKIT']">
+			<ee:transform doc:name="Map APIkit error" doc:id="0e83f0da-7174-4d50-aac4-d6ce0495fe5f" >
+				<ee:message >
+				</ee:message>
+				<ee:variables >
+					<ee:set-variable variableName="httpStatus" ><![CDATA[%dw 2.0
+output application/java
+var statusByType = {
+	BAD_REQUEST: 400,
+	NOT_FOUND: 404,
+	METHOD_NOT_ALLOWED: 405,
+	NOT_ACCEPTABLE: 406,
+	UNSUPPORTED_MEDIA_TYPE: 415,
+	NOT_IMPLEMENTED: 501
+}
+---
+statusByType[error.errorType.identifier] default 400]]></ee:set-variable>
+					<ee:set-variable variableName="errorCode" ><![CDATA[%dw 2.0
+output application/java
+---
+if (error.errorType.identifier == "BAD_REQUEST") "INVALID_REQUEST" else error.errorType.identifier]]></ee:set-variable>
+					<ee:set-variable variableName="errorMessage" ><![CDATA[%dw 2.0
+output application/java
+---
+error.description default "The request could not be processed."]]></ee:set-variable>
+				</ee:variables>
+			</ee:transform>
+			<flow-ref doc:name="log-and-build-error-subflow" doc:id="35332959-8e09-413f-ae39-346f0b941793" name="log-and-build-error-subflow"/>
+		</on-error-propagate>
+		<on-error-propagate enableNotifications="true" logException="false" doc:name="CUSTOMER:INVALID_REQUEST" doc:id="01ee5bb2-de22-4c58-af48-7745fcaf0c7b" type="CUSTOMER:INVALID_REQUEST" >
+			<set-variable value="#[400]" doc:name="httpStatus 400" doc:id="580c16c4-4587-4444-bbf2-4132d41a81c7" variableName="httpStatus" />
+			<set-variable value="INVALID_REQUEST" doc:name="erroCode" doc:id="3ddff815-d151-4e75-98db-a9d27f7cf650" variableName="errorCode" />
+			<set-variable value="#[error.description]" doc:name="errorMessage" doc:id="babe067b-a3c4-43b6-a88d-8876128f0b99" variableName="errorMessage" />
+			<flow-ref doc:name="log-and-build-error-subflow" doc:id="4a82284a-e746-4f7c-85d3-f08b7251c478" name="log-and-build-error-subflow" />
+		</on-error-propagate>
+		<on-error-propagate enableNotifications="true" logException="false" doc:name="CUSTOMER:NOT_FOUND" doc:id="7c3c741c-48c0-4e0e-8b54-a713570ebe9a" type="CUSTOMER:NOT_FOUND" >
+			<set-variable value="#[404]" doc:name="httpStatus 404" doc:id="40b34d7c-bae7-4249-b108-3c6a560bf786" variableName="httpStatus" />
+			<set-variable value="CUSTOMER:NOT_FOUND" doc:name="errorCode" doc:id="84060066-82d7-4b64-8d87-cc1dc0c0d5c1" variableName="errorCode" />
+			<set-variable value="#[error.description]" doc:name="errorMessage" doc:id="4194397b-4465-4fca-bbc1-8702c8228cf9" variableName="errorMessage" />
+			<flow-ref doc:name="log-and-build-error-subflow" doc:id="f1dbeed5-8c2c-4b4a-b4ff-8e51e1a53b24" name="log-and-build-error-subflow" />
+		</on-error-propagate>
+		<on-error-propagate enableNotifications="true" logException="false" doc:name="CUSTOMER:DUPLICATE" doc:id="1339f301-4f34-46cb-aa48-e1723e5df645" type="CUSTOMER:DUPLICATE" >
+			<set-variable value="#[409]" doc:name="httpStatus 409" doc:id="0516a9ea-cfaa-47db-b7be-6f648796079d" variableName="httpStatus" />
+			<set-variable value="DUPLICATE_CUSTOMER" doc:name="errorCode" doc:id="75d00745-4d11-4a70-b50f-f2f0028a375c" variableName="errorCode" />
+			<set-variable value='#[error.description]' doc:name="errorMessage" doc:id="f8dcb21c-b784-4eb7-97e4-e4fdfd9f7405" variableName="errorMessage" />
+			<flow-ref doc:name="log-and-build-error-subflow" doc:id="1ed4d4ac-af61-4500-9c05-5fd3316a8212" name="log-and-build-error-subflow" />
+		</on-error-propagate>
+		<on-error-propagate enableNotifications="true" logException="true" doc:name="MULE:CONNECTIVITY" doc:id="7d571f7c-9be9-403c-8627-95abe464de2d" type="MULE:CONNECTIVITY" >
+			<set-variable value="#[503]" doc:name="httpStatus 503" doc:id="47d697ff-c62a-4a91-b6b6-4f91afeb3774" variableName="httpStatus" />
+			<set-variable value="SERVICE_UNAVAILABLE" doc:name="errorCode" doc:id="51b05d91-1b04-4ceb-8167-e4e0f6c486c9" variableName="errorCode" />
+			<set-variable value='A required system is temporarily unavailable. Please try again later' doc:name="errorMessage" doc:id="e14d551c-7e8c-48de-b7da-8eef3f97792b" variableName="errorMessage" />
+			<flow-ref doc:name="log-and-build-error-subflow" doc:id="b2c0f20a-2587-4a93-b4fb-81936c0e3539" name="log-and-build-error-subflow" />
+		</on-error-propagate>
+		<on-error-propagate enableNotifications="true" logException="true" doc:name="ANY" doc:id="309f0dee-612f-48ec-8d68-379463136ba2" type="ANY">
+			<set-variable value="#[500]" doc:name="httpStatus 500" doc:id="5dd34fa3-d82f-47d0-ab99-505ed324700b" variableName="httpStatus" />
+			<set-variable value="INTERNAL_ERROR" doc:name="errorCode" doc:id="64493ad5-0e4e-44c0-8199-24efaaa664a6" variableName="errorCode" />
+			<set-variable value='An unexpected error occurred' doc:name="errorMessage" doc:id="922ebfaf-6bff-4375-8753-547579b6982e" variableName="errorMessage" />
+			<flow-ref doc:name="log-and-build-error-subflow" doc:id="1319395b-8ff5-490d-b052-af3323158a3b" name="log-and-build-error-subflow" />
+		</on-error-propagate>
+	</error-handler>
+	<sub-flow name="log-and-build-error-subflow" doc:id="94b5dd2f-5990-4de0-b7a6-7a7ff4ddd992" >
+		<choice doc:name="Already logged?" doc:id="2cb7b4dd-4cad-4d62-a726-9e0bb540debc" >
+			<when expression="#[not (vars.errorLogged default false)]">
+				<set-variable value="#[output application/json &#10;indent=false --- &#10;{&#10;	event: 'API_ERROR',&#10;	correlationId: correlationId,&#10;	httpStatus: vars.httpStatus,&#10;	errorCode: vars.errorCode,&#10;	errorType: (error.errorType.namespace default '') ++ ':' ++ (error.errorType.identifier default ''),&#10;	detail: error.description&#10;}]" doc:name="Build log line" doc:id="cc6a0479-e2d7-4ef4-a871-d9281457f527" variableName="errorLog"/>
+			</when>
+		</choice>
+		<choice doc:name="Server error?" doc:id="94aac96c-5724-4ab7-9a10-d48f752a5818" >
+			<when expression="#[vars.httpStatus &gt;= 500]">
+				<logger level="ERROR" doc:name="Log ERROR" doc:id="cd107ad1-b02b-4f48-b2e2-1d352969bbef" message="#[vars.errorLog]"/>
+			</when>
+			<otherwise >
+				<logger level="WARN" doc:name="Log WARN" doc:id="ea62fa68-3948-49a4-a0e1-ca701a224707" message="#[vars.errorLog]"/>
+			</otherwise>
+		</choice>
+		<set-variable value="#[true]" doc:name="errorLogged" doc:id="a4353c7a-e0f1-4466-a2a6-fa1a2e6487a1" variableName="Mark as logged"/>
+		<ee:transform doc:name="Error JSON" doc:id="2b72aafe-8844-4640-b006-2677284e530a" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	status: "ERROR",
+	errorCode: vars.errorCode,
+	message: vars.errorMessage,
+	correlationId: correlationId
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</sub-flow>
+</mule>
