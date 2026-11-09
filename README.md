@@ -1,6 +1,15 @@
 # Customer Management API
-
-## 📈Business Problem
+![DataWeave](https://img.shields.io/badge/DataWeave-2.0-087F8C?style=for-the-badge)
+![MuleSoft](https://img.shields.io/badge/MuleSoft-00A1DF?style=for-the-badge&logo=mulesoft&logoColor=white)
+![MUnit](https://img.shields.io/badge/MUnit-6554C0?style=for-the-badge)
+![MySQL](https://img.shields.io/badge/MySQL-4479A1?style=for-the-badge&logo=mysql&logoColor=white)
+![RAML](https://img.shields.io/badge/RAML-1.0-1666A9?style=for-the-badge)
+![Salesforce](https://img.shields.io/badge/Salesforce-00A1E0?style=for-the-badge&logo=salesforce&logoColor=white)
+## 🎯 Project Overview
+A MuleSoft REST API that integrates MySQL and Salesforce
+to manage customer records, detect duplicates, and
+automate customer creation across both systems.
+## 📈 Business Problem
 ### 🔹 The Problem
 Businesses that manage customer information across multiple systems, such as MySQL and Salesforce, may experience challenges with maintaining accurate and consistent customer data. This occurs when duplicate customer records are created and information is not properly managed between systems.
 ### 🔹 Business Impact
@@ -8,22 +17,70 @@ These challenges can result in duplicated information, inaccurate customer recor
 ### 🔹 The Solution
 The customer-management-api addresses these challenges by integrating MySQL and Salesforce to manage customer information. The API allows users to create, retrieve, update, and delete customer records in MySQL while also creating customer Accounts in Salesforce. It checks for duplicate customer IDs and emails to help prevent duplicate records and uses error handling to return clear, readable error messages when integration operations fail.
 
-## 📂 Detailed API Flow
+## 📷 Detailed API Flow
 <details>
-  <summary><b>Click to expand Screenshots</b></summary>
+  <summary><b>📂 Click to expand screenshots</b></summary>
   <br>
+
+  <h3>1. Customer Creation APIkit Route</h3>
+  <p>
+    Demonstrates how APIkit routes incoming POST requests to the
+    appropriate Mule flow for processing customer creation.
+  </p>
   <p align="center">
-    <img src="assets\customer-management-api-post-apikit-route.png" width="750" alt="Route Customer Creation Flow">
-    <img src="assets\cross-system-customer-creation-munit-tested.png" width="750" alt="Customer Creation Flow">
-    <img src="assets\salesforce-sync-implementation-flow.png" width="750" alt="Salesforce Sync Flow">
-    <img src="assets\create-customer-syncs-salesforce-munit.png" width="750" alt="Create Customer Syncs Salesforce MUnit">
-    <img src="assets\postman-collection.png" width="750" alt="Postman Collection Snapshot">
+    <img src="assets/customer-management-api-post-apikit-route.png"
+         width="750"
+         alt="Customer Creation APIkit Route">
+  </p>
+  
+  <h3>2. Customer Creation Flow</h3>
+  <p>
+    Demonstrates how the Mule flow processes customer creation requests across MySQL and Salesforce.
+  </p>
+  <p align="center">
+    <img src="assets\cross-system-customer-creation-munit-tested.png"
+         width="750"
+         alt="Customer Creation Flow">
+  </p>
+
+  <h3>3. Salesforce Integration Flow</h3>
+  <p>
+    Shows the Mule flow responsible for creating Salesforce Account
+    records after customer information is inserted into MySQL.
+  </p>
+  <p align="center">
+    <img src="assets/salesforce-sync-implementation-flow.png"
+         width="750"
+         alt="Salesforce Integration Flow">
+  </p>
+
+  <h3>4. MUnit Automated Testing</h3>
+  <p>
+    Demonstrates automated testing of the customer creation
+    integration using MUnit to validate expected flow behavior
+    and Salesforce interactions.
+  </p>
+  <p align="center">
+    <img src="assets/create-customer-syncs-salesforce-munit.png"
+         width="750"
+         alt="Customer Creation MUnit Test">
+  </p>
+
+  <h3>5. Postman API Testing</h3>
+  <p>
+    Displays the Postman collection used to manually test
+    GET, POST, PUT, and DELETE requests and verify HTTP
+    response status codes.
+  </p>
+  <p align="center">
+    <img src="assets/postman-collection.png"
+         width="750"
+         alt="Postman Collection Snapshot">
   </p>
 </details>
 
-## 💾 Technologies
 
-![MySQL](https://img.shields.io/badge/MySQL-4479A1?style=for-the-badge&logo=mysql&logoColor=white) ![Salesforce](https://img.shields.io/badge/Salesforce-00A1E0?style=for-the-badge&logo=salesforce&logoColor=white)
+## 💾 Technologies
 
 ### 🔹 API Design
 - **Design Center** - Used to author the API specification in RAML 1.0.
